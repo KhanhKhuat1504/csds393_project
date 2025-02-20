@@ -1,5 +1,6 @@
 import { SignIn } from "@clerk/nextjs";
 import { useState } from "react";
+import { OrganizationSwitcher, SignedIn, UserButton } from "@clerk/nextjs";
 
 export default function Login() {
   // Sample prompts for now (to be replaced with real data from MongoDB)
@@ -26,7 +27,18 @@ export default function Login() {
         
         {/* User Box - Now Black */}
         <div className="ml-auto bg-black text-white px-4 py-2 rounded-lg shadow-md">
-          User
+        <UserButton
+          afterSignOutUrl="/"
+          appearance={{
+            elements: {
+              userButtonTrigger: {
+                "&:focus": {
+                  boxShadow: "#7857FF 0px 0px 0px 3px",
+                },
+              },
+            },
+          }}
+        />
         </div>
       </header>
 
