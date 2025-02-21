@@ -1,58 +1,35 @@
-import { Times } from "@/icons";
 import { OrganizationSwitcher, SignedIn, UserButton } from "@clerk/nextjs";
-import Image from "next/image";
-import Link from "next/link";
 
 export default function Header() {
   return (
-    <header className="flex items-center h-20 gap-4 px-4 border-b border-black border-solid sm:px-8 border-opacity-20">
-      <Link href="/" className="flex items-center h-20 gap-2 sm:gap-4">
-        <Image
-          src="/clerk.svg"
-          alt="Clerk Logo"
-          width={102}
-          height={32}
-          priority
-        />
-        <Times />
-        <Image
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={90}
-          height={18}
-          priority
-        />
-      </Link>
-      <div className="grow" />
-      <SignedIn>
-        <div className="hidden sm:block">
-          <OrganizationSwitcher afterCreateOrganizationUrl="/dashboard" />
-        </div>
-        <div className="block sm:hidden">
-          <OrganizationSwitcher
-            afterCreateOrganizationUrl="/dashboard"
+    <header className="w-full bg-blue-600 py-3 flex justify-center items-center">
+      <h1 className="text-white text-xl font-semibold">CaseAsk</h1>
+
+      <div className="absolute right-4 flex items-center gap-4">
+        <SignedIn>
+          <div className="hidden sm:block">
+            <OrganizationSwitcher afterCreateOrganizationUrl="/dashboard" />
+          </div>
+          <div className="block sm:hidden">
+            <OrganizationSwitcher
+              afterCreateOrganizationUrl="/dashboard"
+              appearance={{
+                elements: {
+                  organizationSwitcherTrigger: `pr-0`,
+                },
+              }}
+            />
+          </div>
+          <UserButton
+            afterSignOutUrl="/"
             appearance={{
               elements: {
-                organizationSwitcherTriggerIcon: `hidden`,
-                organizationPreviewTextContainer: `hidden`,
-                organizationSwitcherTrigger: `pr-0`,
-              },
+                userButtonBox: "focus:ring-4 focus:ring-indigo-500"
+              }
             }}
           />
-        </div>
-        <UserButton
-          afterSignOutUrl="/"
-          appearance={{
-            elements: {
-              userButtonTrigger: {
-                "&:focus": {
-                  boxShadow: "#7857FF 0px 0px 0px 3px",
-                },
-              },
-            },
-          }}
-        />
-      </SignedIn>
+        </SignedIn>
+      </div>
     </header>
   );
 }
