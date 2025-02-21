@@ -11,7 +11,7 @@ export default function Home() {
 
   const handleRedirect = () => {
     if (isChecked) {
-      router.push("/redirect")
+      router.push("/frontpage/Front")
     } else {
       alert("Please check the box before redirecting")
     }
