@@ -27,6 +27,22 @@ export default function Login() {
         
         {/* User Box - Now Black */}
         <div className="ml-auto bg-black text-white px-4 py-2 rounded-lg shadow-md">
+        <SignedIn>
+        <div className="hidden sm:block">
+          <OrganizationSwitcher afterCreateOrganizationUrl="/dashboard" />
+        </div>
+        <div className="block sm:hidden">
+          <OrganizationSwitcher
+            afterCreateOrganizationUrl="/dashboard"
+            appearance={{
+              elements: {
+                organizationSwitcherTriggerIcon: `hidden`,
+                organizationPreviewTextContainer: `hidden`,
+                organizationSwitcherTrigger: `pr-0`,
+              },
+            }}
+          />
+        </div>
         <UserButton
           afterSignOutUrl="/"
           appearance={{
@@ -39,6 +55,7 @@ export default function Login() {
             },
           }}
         />
+      </SignedIn>
         </div>
       </header>
 
