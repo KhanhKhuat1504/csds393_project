@@ -72,3 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   return res.status(200).json({ message: 'Webhook received' });
 }
+
+export const config = {
+  runtime: "nodejs", // Ensure this API route runs in a Node.js environment to avoid Vercel deployment errors
+};
