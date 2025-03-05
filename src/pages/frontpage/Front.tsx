@@ -1,18 +1,51 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { OrganizationSwitcher, SignedIn, UserButton } from "@clerk/nextjs";
 
 export default function Login() {
   const router = useRouter();
-  
-  // Sample prompts for now (Replace with real data from MongoDB)
-  const [prompts, setPrompts] = useState<string[]>(["1", "2", "3", "4", "5", "6"]);
+
+  // Prompts will be fetched from MongoDB via API
+  const [prompts, setPrompts] = useState<string[]>([]);
   const [userResponse, setUserResponse] = useState("");
 
-  const handleGenerateResponse = () => {
-    if (userResponse.trim()) {
-      setPrompts((prevPrompts) => [...prevPrompts, userResponse]);
-      setUserResponse("");
+  // Fetch prompts from backend (API) when component loads
+  useEffect(() => {
+    const fetchPrompts = async () => {
+      try {
+        const response = await fetch("/api/prompts");
+        const data = await response.json();
+        setPrompts(data);
+      } catch (error) {
+        console.error("Failed to load prompts:", error);
+      }
+    };
+
+    fetchPrompts();
+  }, []);
+
+  // Handle new prompt submission and save to MongoDB
+  const handleGenerateResponse = async () => {
+    if (!userResponse.trim()) return;
+
+    try {
+      const response = await fetch("/api/prompts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: userResponse })
+      });
+
+      if (response.ok) {
+        // Update local state after successful save
+        setPrompts((prevPrompts) => [...prevPrompts, userResponse]);
+        setUserResponse("");
+      } else {
+        console.error("Failed to save prompt");
+      }
+    } catch (error) {
+      console.error("Error submitting prompt:", error);
     }
   };
 
@@ -21,13 +54,9 @@ export default function Login() {
       
       {/* Header fixed at the very top */}
       <header className="fixed top-0 left-0 w-full py-4 bg-blue-600 text-white shadow-md flex items-center justify-between px-6">
-        
-        {/* Centered CaseAsk title */}
         <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold">
           CaseAsk
         </h1>
-        
-        {/* User Box - Now Black */}
         <div className="ml-auto bg-black text-white px-4 py-2 rounded-lg shadow-md">
           <SignedIn>
             <div className="hidden sm:block">
@@ -40,8 +69,8 @@ export default function Login() {
                   elements: {
                     organizationSwitcherTriggerIcon: `hidden`,
                     organizationPreviewTextContainer: `hidden`,
-                    organizationSwitcherTrigger: `pr-0`,
-                  },
+                    organizationSwitcherTrigger: `pr-0`
+                  }
                 }}
               />
             </div>
@@ -51,10 +80,10 @@ export default function Login() {
                 elements: {
                   userButtonTrigger: {
                     "&:focus": {
-                      boxShadow: "#7857FF 0px 0px 0px 3px",
-                    },
-                  },
-                },
+                      boxShadow: "#7857FF 0px 0px 0px 3px"
+                    }
+                  }
+                }
               }}
             />
           </SignedIn>
