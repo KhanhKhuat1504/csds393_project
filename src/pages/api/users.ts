@@ -1,8 +1,11 @@
-// pages/api/users.js
+import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '../../lib/dbConnect';
 import User from '../../models/User';
 
-export default async function handler(req, res) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   await dbConnect();
 
   if (req.method === 'POST') {
@@ -10,7 +13,7 @@ export default async function handler(req, res) {
       // Create a new user (accountCreated will be false by default)
       const newUser = await User.create(req.body);
       res.status(201).json({ success: true, data: newUser });
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
   } else if (req.method === 'PUT') {
@@ -21,14 +24,14 @@ export default async function handler(req, res) {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
       res.status(200).json({ success: true, data: updatedUser });
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
   } else if (req.method === 'GET') {
     try {
       const users = await User.find({});
       res.status(200).json({ success: true, data: users });
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
   } else {
