@@ -7,19 +7,6 @@ export default function Header() {
 
       <div className="absolute right-4 flex items-center gap-4">
         <SignedIn>
-          <div className="hidden sm:block">
-            <OrganizationSwitcher afterCreateOrganizationUrl="/dashboard" />
-          </div>
-          <div className="block sm:hidden">
-            <OrganizationSwitcher
-              afterCreateOrganizationUrl="/dashboard"
-              appearance={{
-                elements: {
-                  organizationSwitcherTrigger: `pr-0`,
-                },
-              }}
-            />
-          </div>
           <UserButton
             afterSignOutUrl="/"
             appearance={{
