@@ -1,18 +1,33 @@
-"use client";
-
-//change test 
-
 import { useState } from "react";
+import mongoose from "mongoose";
 import { useRouter } from "next/navigation";
 import Checkbox from "./ui/checkbox";
 import Button from "./ui/button";
+import User from "../../models/User";
 
 export default function Home() {
     const [isChecked, setIsChecked] = useState(false);
     const router = useRouter();
 
-    const handleRedirect = () => {
+    const handleRedirect = async () => {
+        const updateAccountCreated = async () => {
+            try {
+                await fetch("/api/prompts"); // Ensures database connection
+
+                const filter = { _id: '67c0c2d762512db4f77090dd' };
+                const update = { accountCreated: true };
+
+                const updatedUser = await User.findOneAndUpdate(filter, update, { new: true });
+
+                console.log("Updated document:", updatedUser);
+
+            } catch (error) {
+                console.error("Failed to update accountCreated:", error);
+            }
+        };
+
         if (isChecked) {
+            await updateAccountCreated(); // Ensure it completes before redirecting
             router.push("/frontpage/Front");
         } else {
             alert("Please check the box before redirecting");
@@ -38,3 +53,4 @@ export default function Home() {
         </main>
     );
 }
+
