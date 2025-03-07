@@ -1,41 +1,77 @@
 import { useState } from "react";
-import mongoose from "mongoose";
 import { useRouter } from "next/navigation";
 import Checkbox from "./ui/checkbox";
 import Button from "./ui/button";
-import User from "../../models/User";
+
+function generateRandomString(length: number): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  }  
 
 export default function Home() {
     const [isChecked, setIsChecked] = useState(false);
     const router = useRouter();
 
     const handleRedirect = async () => {
-        const updateAccountCreated = async () => {
-            try {
-                await fetch("/api/prompts"); // Ensures database connection
-
-                const filter = { _id: '67c0c2d762512db4f77090dd' };
-                const update = { accountCreated: true };
-
-                const updatedUser = await User.findOneAndUpdate(filter, update, { new: true });
-
-                console.log("Updated document:", updatedUser);
-
-            } catch (error) {
-                console.error("Failed to update accountCreated:", error);
-            }
-        };
-
-        if (isChecked) {
-            await updateAccountCreated(); // Ensure it completes before redirecting
-            router.push("/frontpage/Front");
-        } else {
+        if (!isChecked) {
             alert("Please check the box before redirecting");
+            return;
+        }
+    
+        try {
+            const response = await fetch("/api/saveUser", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    clerkId: generateRandomString(24),
+                    email: "example@aol.com",
+                    first_name: "John",
+                    last_name: "Doe",
+                    gender: "male",
+                }),
+            });
+    
+            const data = await response.json();
+            if (response.ok) {
+                console.log("User saved successfully:", data);
+                router.push("/frontpage/Front");
+            } else {
+                console.error("Error saving user:", data.error);
+            }
+        } catch (error) {
+            console.error("Failed to send request:", error);
         }
     };
+    
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-24">
+            {/* Multiple Choice Question */}
+            <div className="mb-4">
+                <p className="text-lg font-semibold">What year are you?</p>
+                <div className="space-y-2">
+                    {["Freshmen", "Sophomore", "Junior", "Senior"].map((option) => (
+                        <label key={option} className="flex items-center space-x-2">
+                            <input
+                                type="radio"
+                                name="quiz"
+                                value={option}
+                                //checked={selectedOption === option}
+                                //onChange={() => setSelectedOption(option)}
+                                className="cursor-pointer"
+                            />
+                            <span>{option}</span>
+                        </label>
+                    ))}
+                </div>
+            </div>
+
             <div className="flex items-center space-x-2 mb-4">
                 <Checkbox
                     id="terms"
