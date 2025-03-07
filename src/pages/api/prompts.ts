@@ -1,35 +1,27 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import mongoose from 'mongoose';
-import dbConnect from '../../lib/dbConnect'; // adjust the path if needed
+import dbConnect from '../../lib/dbConnect';
 
-// Define a Mongoose schema (only once — you could move this to a separate file too)
-const promptSchema = new mongoose.Schema({
-  text: { type: String, required: true }
-});
+// Define schema for users (match your document structure in MongoDB)
+const userSchema = new mongoose.Schema({
+  clerkId: String,
+  email: String,
+  first_name: String,
+  last_name: String,
+  gender: String,
+  accountCreated: Boolean,
+}, { collection: 'users' });  // Specify collection name in Compass
 
-// Create or reuse the model (prevents redefining the model on every request in dev mode)
-const Prompt = mongoose.models.Prompt || mongoose.model('Prompt', promptSchema);
+// Create/reuse the model
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect();
 
   if (req.method === 'GET') {
-    const prompts = await Prompt.find({});
-    return res.status(200).json(prompts.map(p => p.text));  // Return only text array
+    const users = await User.find({});
+    return res.status(200).json(users);
   }
 
-  if (req.method === 'POST') {
-    const { text } = req.body;
-
-    if (!text) {
-      return res.status(400).json({ message: "Text is required" });
-    }
-
-    const newPrompt = new Prompt({ text });
-    await newPrompt.save();
-
-    return res.status(201).json({ message: "Prompt saved" });
-  }
-
-  return res.status(405).json({ message: "Method not allowed" });
+  res.status(405).json({ message: 'Method not allowed' });
 }
