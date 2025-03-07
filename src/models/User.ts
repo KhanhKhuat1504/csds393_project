@@ -15,7 +15,9 @@ const UserSchema: Schema = new Schema({
   first_name: { type: String, default: "" },
   last_name: { type: String, default: "" },
   gender: { type: String, default: "" },
-  accountCreated: { type: Boolean, default: false }
+  accountCreated: { type: Boolean, default: false },
+  year: { type: String, default: "" },
+  
 });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
