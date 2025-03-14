@@ -26,15 +26,15 @@ export default function CreatePrompt() {
     setLoading(true);
     try {
       const token = await getToken();
-      const response = await fetch("/api/prompt", {  // ✅ Correct API URL
+      const response = await fetch("/api/prompt", {  
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ✅ Clerk authentication
+          Authorization: `Bearer ${token}`, 
         },
         body: JSON.stringify({
           promptQuestion,
-          resp1: responses[0], // ✅ Mapping responses to MongoDB schema
+          resp1: responses[0], 
           resp2: responses[1],
           resp3: responses[2],
           resp4: responses[3],
@@ -44,7 +44,7 @@ export default function CreatePrompt() {
       const data = await response.json();
       if (response.ok) {
         alert("Prompt submitted successfully!");
-        router.push("/frontpage/Front"); // ✅ Redirect back to prompts page
+        router.push("/frontpage/Front"); 
       } else {
         alert(`Failed to create prompt: ${data.error || "Unknown error"}`);
       }
