@@ -1,44 +1,49 @@
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { OrganizationSwitcher, SignedIn, UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher, SignedIn, UserButton, useAuth } from "@clerk/nextjs";
 
-// User type interface for TypeScript (optional, can remove if using .js)
-interface User {
+// MongoDB Prompt structure
+interface Prompt {
   _id: string;
-  first_name: string;
+  promptQuestion: string;
 }
 
-export default function Login() {
+export default function Front() {
   const router = useRouter();
+  const { getToken } = useAuth();
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [users, setUsers] = useState<User[]>([]);
-
-  // Fetch users (first names) from MongoDB when page loads
+  // Fetch prompts from MongoDB with Clerk authentication
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchPrompts = async () => {
+      setLoading(true);
       try {
-        const response = await fetch("/api/prompts");
+        const token = await getToken();
+        const response = await fetch("/api/prompt", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const data = await response.json();
-        setUsers(data);
+        if (data.success) {
+          setPrompts(data.data);
+        } else {
+          console.error("Failed to load prompts:", data.error);
+        }
       } catch (error) {
-        console.error("Failed to load users:", error);
+        console.error("Failed to fetch prompts:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUsers();
-  }, []);
-
-  const [userResponse, setUserResponse] = useState("");
-
-  const handleGenerateResponse = () => {
-    // Just a placeholder if you still want to keep the button for future use
-    console.log("Response submitted (currently does nothing)");
-  };
+    fetchPrompts();
+  }, [getToken]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 pt-12">
-
-      {/* Header fixed at the very top */}
+      {/* Header */}
       <header className="fixed top-0 left-0 w-full py-4 bg-blue-600 text-white shadow-md flex items-center justify-between px-6">
         <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold">
           CaseAsk
@@ -48,67 +53,38 @@ export default function Login() {
             <div className="hidden sm:block">
               <OrganizationSwitcher afterCreateOrganizationUrl="/dashboard" />
             </div>
-            <div className="block sm:hidden">
-              <OrganizationSwitcher
-                afterCreateOrganizationUrl="/dashboard"
-                appearance={{
-                  elements: {
-                    organizationSwitcherTriggerIcon: `hidden`,
-                    organizationPreviewTextContainer: `hidden`,
-                    organizationSwitcherTrigger: `pr-0`
-                  }
-                }}
-              />
-            </div>
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  userButtonTrigger: {
-                    "&:focus": {
-                      boxShadow: "#7857FF 0px 0px 0px 3px"
-                    }
-                  }
-                }
-              }}
-            />
+            <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </div>
       </header>
 
-      {/* Centered Prompts Section - now showing users */}
-      <div className="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 flex flex-col items-center">
-        <h2 className="text-xl font-semibold text-center text-gray-800 mb-2">Users</h2>
-
-        <div className="h-60 overflow-y-auto border border-gray-300 rounded-lg p-4 bg-gray-50 w-full">
-          {users.map((user) => (
-            <div 
-              key={user._id} 
-              className="p-3 mb-2 bg-white rounded-lg shadow cursor-pointer hover:bg-gray-200 transition"
-              onClick={() => router.push(`/frontpage/userdetails?id=${user._id}`)}
-            >
-              {user.first_name || "Unnamed User"}
-            </div>
-          ))}
+      {/* Prompts Section */}
+      <div className="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 flex flex-col items-center mt-8">
+        <h2 className="text-xl font-semibold text-center text-gray-800 mb-4">
+          Prompts
+        </h2>
+        <div className="w-full space-y-4">
+          {loading ? (
+            <p className="text-gray-500 text-center">Loading prompts...</p>
+          ) : prompts.length > 0 ? (
+            prompts.map((prompt) => (
+              <div key={prompt._id} className="p-4 bg-white rounded-lg shadow">
+                <h3 className="text-lg font-semibold">{prompt.promptQuestion}</h3>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-center">No prompts available</p>
+          )}
         </div>
       </div>
 
-      {/* User Response Section (Optional if needed in future) */}
-      <div className="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 mt-6 flex flex-col items-center">
-        <h2 className="text-xl font-semibold text-center text-gray-800 mb-2">Generate Your Response</h2>
-        <textarea 
-          className="w-full h-32 p-3 border border-gray-300 rounded-lg bg-gray-50 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="Type your response here..."
-          value={userResponse}
-          onChange={(e) => setUserResponse(e.target.value)}
-        />
-        <button 
-          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-          onClick={handleGenerateResponse}
-        >
-          Generate Response
-        </button>
-      </div>
+      {/* Create Prompt Button */}
+      <button
+        className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+        onClick={() => router.push("/frontpage/create-prompt")}
+      >
+        Create Prompt
+      </button>
     </main>
   );
 }
