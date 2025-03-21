@@ -23,6 +23,7 @@ export default function Home() {
         }
     
         try {
+            const randomId = generateRandomString(5);
             const response = await fetch("/api/saveUser", {
                 method: "POST",
                 headers: {
@@ -30,9 +31,9 @@ export default function Home() {
                 },
                 body: JSON.stringify({
                     clerkId: generateRandomString(24),
-                    email: "example@aol.com",
-                    first_name: "John",
-                    last_name: "Doe",
+                    email: `user${randomId}@example.com`,
+                    first_name: `User${randomId}`,
+                    last_name: `Test`,
                     gender: "male",
                 }),
             });
