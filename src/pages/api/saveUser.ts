@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
 import dbConnect from '../../lib/dbConnect';
-import { useUser } from '@clerk/clerk-react'; 
+//import { useUser } from '@clerk/clerk-react'; 
 
 const schema = new mongoose.Schema({
     clerkId: { type: String, required: true, unique: true },
@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const { clerkId, email, first_name, last_name, gender } = req.body;
 
-        const user = new User({
+        const caseUser = new User({
             clerkId,
             email,
             first_name,
@@ -33,19 +33,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             accountCreated: true,
         });
 
-        //const existingClerkId = await useUser().id; 
-
-        const existingUser = await User.findOneAndUpdate(
-            { clerkId: "user_2tgSJ1GTlvgoXBv7629ayBk7okO" },
-            { accountCreated: true },
-            { new: true }
-        );
-
-        if (existingUser) {
-            return res.status(200).json({ message: "User updated successfully!" });
+        // Get the clerkId directly from the request body
+        if(clerkId) {
+            const existingUser = await User.findOneAndUpdate(
+                { clerkId: clerkId },
+                { accountCreated: true },
+                { new: true }
+            );
+            if (existingUser) {
+                return res.status(200).json({ message: "User updated successfully!" });
+            }
         }
 
-        const savedUser = await user.save();
+        const savedUser = await caseUser.save();
 
         const updatedDocument = await User.findByIdAndUpdate(
             savedUser._id,
