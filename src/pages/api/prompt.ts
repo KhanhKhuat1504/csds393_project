@@ -1,3 +1,4 @@
+// pages/api/prompt.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '../../lib/dbConnect';
 import Prompt from '../../models/Prompt';
@@ -6,6 +7,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // Debug: Log request headers to inspect the Authorization header
+  console.log("Request headers:", req.headers);
+
   await dbConnect();
 
   if (req.method === 'POST') {
@@ -67,4 +71,4 @@ export default async function handler(
   } else {
     res.status(405).json({ success: false, message: 'Method not allowed' });
   }
-} 
+}

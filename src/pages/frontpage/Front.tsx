@@ -1,3 +1,4 @@
+// components/Front.tsx
 import { SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 
@@ -19,21 +20,27 @@ export default function Front() {
 
   useEffect(() => {
     const fetchPrompts = async () => {
+      if (!isSignedIn) return; // Only fetch if the user is signed in
       setLoading(true);
       try {
-        // Conditionally add Authorization header if token exists
         const token = await getToken();
-        const headers: Record<string, string> = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
+        console.log("Fetched token:", token); // Debug: Check token value
+        if (!token) {
+          setError("No valid token available");
+          setLoading(false);
+          return;
         }
+        const headers = { Authorization: `Bearer ${token}` };
         const res = await fetch("/api/prompt", { headers });
-        if (!res.ok) throw new Error("Failed to fetch prompts");
+        if (!res.ok) {
+          const errMsg = await res.text();
+          throw new Error(`Failed to fetch prompts: ${res.status} ${errMsg}`);
+        }
         const data = await res.json();
-        if (data.success) {
+        if (data.success && Array.isArray(data.data)) {
           setPrompts(data.data);
         } else {
-          setError("Failed to fetch prompts");
+          setError("Invalid data format received from API");
         }
       } catch (err: any) {
         setError(err.message);
@@ -42,9 +49,16 @@ export default function Front() {
       }
     };
 
-    // Re-fetch when the user's sign-in state changes
     fetchPrompts();
   }, [getToken, isSignedIn]);
+
+  // Clear previous state when the user logs out
+  useEffect(() => {
+    if (!isSignedIn) {
+      setPrompts([]);
+      setError("");
+    }
+  }, [isSignedIn]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 pt-12">
@@ -60,9 +74,7 @@ export default function Front() {
       </header>
 
       <div className="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 flex flex-col items-center mt-8">
-        <h2 className="text-xl font-semibold text-center text-gray-800 mb-4">
-          Prompts
-        </h2>
+        <h2 className="text-xl font-semibold text-center text-gray-800 mb-4">Prompts</h2>
 
         {loading && <p>Loading prompts...</p>}
         {error && <p className="text-red-600">{error}</p>}
@@ -72,9 +84,7 @@ export default function Front() {
             {prompts.length > 0 ? (
               prompts.map((prompt) => (
                 <div key={prompt._id} className="p-4 bg-white rounded-lg shadow">
-                  <h3 className="text-lg font-semibold">
-                    {prompt.promptQuestion}
-                  </h3>
+                  <h3 className="text-lg font-semibold">{prompt.promptQuestion}</h3>
                 </div>
               ))
             ) : (
