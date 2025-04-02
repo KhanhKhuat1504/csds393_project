@@ -1,6 +1,7 @@
-import { Schema, model, Document } from 'mongoose';
+// src/models/Prompt.ts
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
-interface IPrompt extends Document {
+export interface IPrompt extends Document {
   promptQuestion: string;
   resp1: string;
   resp2: string;
@@ -8,27 +9,17 @@ interface IPrompt extends Document {
   resp4: string;
 }
 
-const PromptSchema = new Schema<IPrompt>({
-  promptQuestion: {
-    type: String,
-    default: ''
-  },
-  resp1: {
-    type: String,
-    default: ''
-  },
-  resp2: {
-    type: String,
-    default: ''
-  },
-  resp3: {
-    type: String,
-    default: ''
-  },
-  resp4: {
-    type: String,
-    default: ''
-  }
+const PromptSchema: Schema = new mongoose.Schema({
+  promptQuestion: { type: String, required: true },
+  resp1: { type: String },
+  resp2: { type: String },
+  resp3: { type: String },
+  resp4: { type: String },
 });
 
-export default model<IPrompt>('Prompt', PromptSchema);
+// Check if the model already exists (to prevent OverwriteModelError)
+const Prompt: Model<IPrompt> =
+  mongoose.models.Prompt || mongoose.model<IPrompt>('Prompt', PromptSchema);
+
+export default Prompt;
+
