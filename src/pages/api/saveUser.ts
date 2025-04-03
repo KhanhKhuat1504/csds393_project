@@ -10,6 +10,8 @@ const schema = new mongoose.Schema({
     last_name: { type: String, default: "" },
     gender: { type: String, default: "" },
     accountCreated: { type: Boolean, default: false },
+    position: { type: String, default: "" },
+    year: { type: Number, default: 2000}, 
 });
 
 const User = mongoose.models.User || mongoose.model("User", schema);
@@ -31,6 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             last_name,
             gender,
             accountCreated: true,
+            position: "", 
+            year: 2000, 
         });
 
         // Get the clerkId directly from the request body
@@ -44,7 +48,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(200).json({ message: "User updated successfully!" });
             }
         }
-
+        
+        
         const savedUser = await caseUser.save();
 
         const updatedDocument = await User.findByIdAndUpdate(
@@ -53,6 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             { new: true });
 
         return res.status(201).json({ message: "User saved successfully!" });
+        
     } catch (error) {
         return res.status(500).json({ error: "Database save failed" });
     }
