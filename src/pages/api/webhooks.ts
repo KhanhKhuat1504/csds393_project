@@ -61,7 +61,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         last_name: last_name || '',
         gender: gender || '',
         accountCreated: false,
+        position: '',
+        year: 2000,
       });
+      
       await user.save();
       console.log('User saved to MongoDB:', user);
     } else {
