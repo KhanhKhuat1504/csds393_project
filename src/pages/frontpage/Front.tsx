@@ -19,10 +19,11 @@ export default function Front() {
   const { getToken } = useAuth();
   const { isSignedIn } = useUser();
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
+  const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPrompts = async () => {
-      if (!isSignedIn) return; // Only fetch if the user is signed in
+      if (!isSignedIn) return;
       setLoading(true);
       try {
         const token = await getToken();
@@ -53,7 +54,6 @@ export default function Front() {
     fetchPrompts();
   }, [getToken, isSignedIn]);
 
-  // Clear previous state when the user logs out
   useEffect(() => {
     if (!isSignedIn) {
       setPrompts([]);
@@ -63,10 +63,16 @@ export default function Front() {
 
   const handlePromptClick = (prompt: Prompt) => {
     setSelectedPrompt(prompt);
+    setSelectedResponse(null);
   };
 
   const handleBackClick = () => {
     setSelectedPrompt(null);
+    setSelectedResponse(null);
+  };
+
+  const handleResponseClick = (response: string) => {
+    setSelectedResponse(response);
   };
 
   return (
@@ -84,7 +90,6 @@ export default function Front() {
 
       <div className="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 flex flex-col items-center mt-8">
         {selectedPrompt ? (
-          // Display the details for a single prompt
           <div className="w-full">
             <button
               className="mb-4 text-blue-600 hover:underline"
@@ -95,23 +100,24 @@ export default function Front() {
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               {selectedPrompt.promptQuestion}
             </h2>
-            <div className="text-gray-700">
-              <p>
-                <strong>Response 1:</strong> {selectedPrompt.resp1}
-              </p>
-              <p>
-                <strong>Response 2:</strong> {selectedPrompt.resp2}
-              </p>
-              <p>
-                <strong>Response 3:</strong> {selectedPrompt.resp3}
-              </p>
-              <p>
-                <strong>Response 4:</strong> {selectedPrompt.resp4}
-              </p>
+            <div className="grid grid-cols-2 gap-4">
+              {[selectedPrompt.resp1, selectedPrompt.resp2, selectedPrompt.resp3, selectedPrompt.resp4].map((response, index) => (
+                <button
+                  key={index}
+                  className={`p-4 rounded-lg shadow w-full border-2 transition-colors ${selectedResponse === response ? 'border-blue-800 bg-blue-300' : 'border-transparent bg-gray-200 hover:bg-gray-300'}`}
+                  onClick={() => handleResponseClick(response)}
+                >
+                  {response}
+                </button>
+              ))}
             </div>
+            {selectedResponse && (
+              <div className="mt-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
+                Example result: <span className="font-bold">{Math.floor(Math.random() * 100)}%</span>
+              </div>
+            )}
           </div>
         ) : (
-          // Display the list of prompts
           <>
             <h2 className="text-xl font-semibold text-center text-gray-800 mb-4">Prompts</h2>
             {loading && <p>Loading prompts...</p>}
@@ -135,7 +141,6 @@ export default function Front() {
                 )}
               </div>
             )}
-            {/* Create button */}
             <Link href="/frontpage/create-prompt">
               <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md">
                 Create
