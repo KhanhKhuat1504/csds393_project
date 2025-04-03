@@ -7,6 +7,8 @@ interface IUser extends Document {
   last_name: string;
   gender: string;
   accountCreated: boolean;
+  position: string;
+  year: number; 
 }
 
 const UserSchema: Schema = new Schema({
@@ -16,7 +18,8 @@ const UserSchema: Schema = new Schema({
   last_name: { type: String, default: "" },
   gender: { type: String, default: "" },
   accountCreated: { type: Boolean, default: false },
-  year: { type: String, default: "" },
+  position: { type: String, default: "" },
+  year: { type: Number, default: 2000}, 
   
 });
 
