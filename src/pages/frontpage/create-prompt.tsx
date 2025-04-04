@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { OrganizationSwitcher, SignedIn, UserButton, useAuth } from "@clerk/nextjs";
+import { OrganizationSwitcher, SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 
 export default function CreatePrompt() {
   const router = useRouter();
   const { getToken } = useAuth();
+  const { user } = useUser();
   const [promptQuestion, setPromptQuestion] = useState("");
   const [responses, setResponses] = useState(["", "", "", ""]);
   const [loading, setLoading] = useState(false);
@@ -26,25 +27,27 @@ export default function CreatePrompt() {
     setLoading(true);
     try {
       const token = await getToken();
-      const response = await fetch("/api/prompt", {  
+      const response = await fetch("/api/prompt", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           promptQuestion,
-          resp1: responses[0], 
+          resp1: responses[0],
           resp2: responses[1],
           resp3: responses[2],
           resp4: responses[3],
+          // New required field in the updated model
+          createdBy: user?.id,
         }),
       });
 
       const data = await response.json();
       if (response.ok) {
         alert("Prompt submitted successfully!");
-        router.push("/frontpage/Front"); 
+        router.push("/frontpage/Front");
       } else {
         alert(`Failed to create prompt: ${data.error || "Unknown error"}`);
       }
@@ -65,9 +68,7 @@ export default function CreatePrompt() {
         </h1>
         <div className="ml-auto bg-black text-white px-4 py-2 rounded-lg shadow-md">
           <SignedIn>
-            <div className="hidden sm:block">
-              <OrganizationSwitcher afterCreateOrganizationUrl="/dashboard" />
-            </div>
+           
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </div>
@@ -75,7 +76,9 @@ export default function CreatePrompt() {
 
       {/* Create Prompt Section */}
       <div className="w-full max-w-md bg-white shadow-xl rounded-xl p-6 mt-16">
-        <h1 className="text-xl font-bold text-gray-800 mb-6 text-center">Create a New Prompt</h1>
+        <h1 className="text-xl font-bold text-gray-800 mb-6 text-center">
+          Create a New Prompt
+        </h1>
 
         {/* Prompt Question Input */}
         <label className="block text-gray-700 font-semibold mb-2">Prompt Question:</label>
