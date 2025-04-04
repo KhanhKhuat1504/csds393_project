@@ -1,7 +1,8 @@
 // components/AlternateFront.tsx
 import { SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import PromptResponseStats from "../../components/PromptResponseStats";
 
 interface Prompt {
   _id: string;
@@ -17,9 +18,13 @@ export default function AlternateFront() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { getToken } = useAuth();
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
+  const [previewResponse, setPreviewResponse] = useState<string | null>(null);
+  const [hoveredResponse, setHoveredResponse] = useState<string | null>(null);
+  const [userResponses, setUserResponses] = useState<{ [promptId: string]: string }>({});
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
     const fetchPrompts = async () => {
@@ -63,7 +68,33 @@ export default function AlternateFront() {
 
   const handlePromptClick = (prompt: Prompt) => {
     setSelectedPrompt(prompt);
-    setSelectedResponse(null);
+    
+    // Set the selected response if user has already responded to this prompt
+    if (userResponses[prompt._id]) {
+      const userAnswer = userResponses[prompt._id];
+      setSelectedResponse(userAnswer);
+      setPreviewResponse(userAnswer);
+      
+      // Fetch stats immediately
+      const fetchStats = async () => {
+        try {
+          const statsRes = await fetch(`/api/prompt-stats?promptId=${prompt._id}`);
+          if (statsRes.ok) {
+            const statsData = await statsRes.json();
+            if (statsData.success) {
+              setStats(statsData.data);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching stats:", err);
+        }
+      };
+      
+      fetchStats();
+    } else {
+      setSelectedResponse(null);
+      setPreviewResponse(null);
+    }
   };
 
   const handleBackClick = () => {
@@ -71,9 +102,71 @@ export default function AlternateFront() {
     setSelectedResponse(null);
   };
 
-  const handleResponseClick = (response: string) => {
+  const handleResponseClick = async (response: string) => {
+    if (!isSignedIn || !user || !selectedPrompt) return;
+    
     setSelectedResponse(response);
+    
+    try {
+      const token = await getToken();
+      if (!token) return;
+      
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      
+      // Save the user's response
+      const res = await fetch("/api/user-responses", {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          userId: user.id,
+          promptId: selectedPrompt._id,
+          selectedResponse: response
+        })
+      });
+      
+      if (res.ok) {
+        // Automatically show stats for the selected response
+        setPreviewResponse(response);
+        
+        // Fetch stats immediately to display accurate data
+        try {
+          const statsRes = await fetch(`/api/prompt-stats?promptId=${selectedPrompt._id}`);
+          if (statsRes.ok) {
+            const statsData = await statsRes.json();
+            if (statsData.success) {
+              setStats(statsData.data);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching stats:", err);
+        }
+      }
+    } catch (err) {
+      console.error("Error saving response:", err);
+    }
   };
+
+  // Calculate percentage for an answer
+  const calculatePercentage = (response: string): number => {
+    if (!stats || !stats.answerStats || !stats.answerStats[response]) {
+      return 0;
+    }
+    
+    const totalResponses = stats.responseCount;
+    const responseCount = stats.answerStats[response].count;
+    
+    if (totalResponses === 0) return 0;
+    
+    return Math.round((responseCount / totalResponses) * 100);
+  };
+
+  // Handle stats loaded from child component
+  const handleStatsLoaded = useCallback((newStats: any) => {
+    setStats(newStats);
+  }, []);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-200 px-4 pt-12">
@@ -126,8 +219,19 @@ export default function AlternateFront() {
             </div>
             {selectedResponse && (
               <div className="mt-4 p-4 bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700">
-                Example result: <span className="font-bold">{Math.floor(Math.random() * 100)}%</span>
+                Result: <span className="font-bold">{stats ? calculatePercentage(selectedResponse) : "Loading..."}%</span>
               </div>
+            )}
+
+            {/* Display demographics charts if user has responded */}
+            {selectedResponse && (
+              <PromptResponseStats 
+                promptId={selectedPrompt._id} 
+                selectedResponse={selectedResponse}
+                hoveredResponse={hoveredResponse}
+                previewResponse={previewResponse}
+                onStatsLoaded={handleStatsLoaded}
+              />
             )}
           </div>
         ) : (

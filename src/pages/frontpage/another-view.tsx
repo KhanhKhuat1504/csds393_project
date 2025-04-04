@@ -1,6 +1,7 @@
 import { SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import PromptResponseStats from "../../components/PromptResponseStats";
 
 interface Prompt {
   _id: string;
@@ -29,8 +30,11 @@ export default function AnotherView() {
   const { isSignedIn, user } = useUser();
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
+  const [previewResponse, setPreviewResponse] = useState<string | null>(null);
+  const [hoveredResponse, setHoveredResponse] = useState<string | null>(null);
   const [userResponses, setUserResponses] = useState<{ [promptId: string]: string }>({});
   const [loadingResponses, setLoadingResponses] = useState(false);
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
     const fetchPrompts = async () => {
@@ -113,9 +117,29 @@ export default function AnotherView() {
   // When a prompt is selected, set selected response from user responses if available
   useEffect(() => {
     if (selectedPrompt && userResponses[selectedPrompt._id]) {
-      setSelectedResponse(userResponses[selectedPrompt._id]);
+      const userAnswer = userResponses[selectedPrompt._id];
+      setSelectedResponse(userAnswer);
+      setPreviewResponse(userAnswer);
+      
+      // Fetch stats immediately to display accurate data
+      const fetchStats = async () => {
+        try {
+          const statsRes = await fetch(`/api/prompt-stats?promptId=${selectedPrompt._id}`);
+          if (statsRes.ok) {
+            const statsData = await statsRes.json();
+            if (statsData.success) {
+              setStats(statsData.data);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching stats:", err);
+        }
+      };
+      
+      fetchStats();
     } else if (selectedPrompt) {
       setSelectedResponse(null);
+      setPreviewResponse(null);
     }
   }, [selectedPrompt, userResponses]);
 
@@ -131,6 +155,7 @@ export default function AnotherView() {
   const handleResponseClick = async (response: string) => {
     // If user has already responded to this prompt, don't allow changing the answer
     if (selectedPrompt && userResponses[selectedPrompt._id]) {
+      setPreviewResponse(response);
       return;
     }
     
@@ -165,6 +190,22 @@ export default function AnotherView() {
           ...prev,
           [selectedPrompt._id]: response
         }));
+        
+        // Automatically show stats for the selected response
+        setPreviewResponse(response);
+        
+        // Fetch stats immediately to display accurate data
+        try {
+          const statsRes = await fetch(`/api/prompt-stats?promptId=${selectedPrompt._id}`);
+          if (statsRes.ok) {
+            const statsData = await statsRes.json();
+            if (statsData.success) {
+              setStats(statsData.data);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching stats:", err);
+        }
       } else {
         // Even if there's an error (like user already responded), get the existing response
         const data = await res.json();
@@ -174,6 +215,9 @@ export default function AnotherView() {
             ...prev,
             [selectedPrompt._id]: data.data.selectedResponse
           }));
+          
+          // Also show stats for the existing response
+          setPreviewResponse(data.data.selectedResponse);
         }
       }
     } catch (err) {
@@ -269,6 +313,25 @@ export default function AnotherView() {
     return !!userResponses[promptId];
   };
 
+  // Calculate percentage for an answer
+  const calculatePercentage = (response: string): number => {
+    if (!stats || !stats.answerStats || !stats.answerStats[response]) {
+      return 0;
+    }
+    
+    const totalResponses = stats.responseCount;
+    const responseCount = stats.answerStats[response].count;
+    
+    if (totalResponses === 0) return 0;
+    
+    return Math.round((responseCount / totalResponses) * 100);
+  };
+
+  // Handle stats loaded from child component
+  const handleStatsLoaded = useCallback((newStats: any) => {
+    setStats(newStats);
+  }, []);
+
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-red-50 px-4 pt-12">
       <header className="fixed top-0 left-0 w-full py-4 bg-red-700 text-white shadow-md flex items-center justify-between px-6 z-50">
@@ -336,13 +399,30 @@ export default function AnotherView() {
             </div>
             {selectedResponse && (
               <div className="mt-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
-                Example result: <span className="font-bold">{Math.floor(Math.random() * 100)}%</span>
+                Result: <span className="font-bold">{stats ? calculatePercentage(selectedResponse) : "Loading..."}%</span>
               </div>
             )}
             {isResponseDisabled(selectedPrompt._id) && (
               <div className="mt-4 p-3 bg-gray-100 text-gray-700 rounded text-center text-sm">
                 You've already responded to this prompt. Your selection cannot be changed.
               </div>
+            )}
+            
+            {selectedResponse && (
+              <div className="mt-2 p-2 bg-red-50 text-red-600 rounded text-center text-sm">
+                Click "View Stats" on other responses to see their demographic data
+              </div>
+            )}
+            
+            {/* Display demographics charts if user has responded */}
+            {selectedResponse && (
+              <PromptResponseStats 
+                promptId={selectedPrompt._id} 
+                selectedResponse={selectedResponse}
+                hoveredResponse={hoveredResponse}
+                previewResponse={previewResponse}
+                onStatsLoaded={handleStatsLoaded}
+              />
             )}
           </div>
         ) : (

@@ -144,9 +144,29 @@ export default function Archived() {
   // When a prompt is selected, set selected response from user responses if available
   useEffect(() => {
     if (selectedPrompt && userResponses[selectedPrompt._id]) {
-      setSelectedResponse(userResponses[selectedPrompt._id]);
+      const userAnswer = userResponses[selectedPrompt._id];
+      setSelectedResponse(userAnswer);
+      setPreviewResponse(userAnswer);
+      
+      // Fetch stats immediately to display accurate data
+      const fetchStats = async () => {
+        try {
+          const statsRes = await fetch(`/api/prompt-stats?promptId=${selectedPrompt._id}`);
+          if (statsRes.ok) {
+            const statsData = await statsRes.json();
+            if (statsData.success) {
+              setStats(statsData.data);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching stats:", err);
+        }
+      };
+      
+      fetchStats();
     } else if (selectedPrompt) {
       setSelectedResponse(null);
+      setPreviewResponse(null);
     }
   }, [selectedPrompt, userResponses]);
 
@@ -162,6 +182,7 @@ export default function Archived() {
   const handleResponseClick = async (response: string) => {
     // If user has already responded to this prompt, don't allow changing the answer
     if (selectedPrompt && userResponses[selectedPrompt._id]) {
+      setPreviewResponse(response);
       return;
     }
     
@@ -196,6 +217,22 @@ export default function Archived() {
           ...prev,
           [selectedPrompt._id]: response
         }));
+        
+        // Automatically show stats for the selected response
+        setPreviewResponse(response);
+        
+        // Fetch stats immediately to display accurate data
+        try {
+          const statsRes = await fetch(`/api/prompt-stats?promptId=${selectedPrompt._id}`);
+          if (statsRes.ok) {
+            const statsData = await statsRes.json();
+            if (statsData.success) {
+              setStats(statsData.data);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching stats:", err);
+        }
       } else {
         // Even if there's an error (like user already responded), get the existing response
         const data = await res.json();
@@ -205,6 +242,9 @@ export default function Archived() {
             ...prev,
             [selectedPrompt._id]: data.data.selectedResponse
           }));
+          
+          // Also show stats for the existing response
+          setPreviewResponse(data.data.selectedResponse);
         }
       }
     } catch (err) {
