@@ -19,16 +19,49 @@ export default async function handler(
   } else if (req.method === 'PUT') {
     try {
       const { id, ...updateData } = req.body;
-      const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
+      
+      // First try to find by clerkId (which is what we get from Clerk)
+      let updatedUser = await User.findOneAndUpdate(
+        { clerkId: id }, 
+        updateData, 
+        { new: true }
+      );
+      
+      // If no user found with clerkId, try with MongoDB _id as fallback
+      if (!updatedUser) {
+        updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
+      }
+      
       if (!updatedUser) {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
+      
       res.status(200).json({ success: true, data: updatedUser });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
   } else if (req.method === 'GET') {
     try {
+      // Check if we're looking for a specific user
+      const { id } = req.query;
+      
+      if (id) {
+        // First try to find by clerkId
+        let user = await User.findOne({ clerkId: id });
+        
+        // If not found, try by MongoDB _id
+        if (!user) {
+          user = await User.findById(id);
+        }
+        
+        if (!user) {
+          return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        
+        return res.status(200).json({ success: true, data: user });
+      }
+      
+      // Otherwise return all users
       const users = await User.find({});
       res.status(200).json({ success: true, data: users });
     } catch (error: any) {

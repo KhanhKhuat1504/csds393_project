@@ -1,43 +1,109 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Checkbox from "./ui/checkbox";
 import Button from "./ui/button";
-
-function generateRandomString(length:number): string {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-}  
+import { useUser } from "@clerk/nextjs";
 
 export default function Home() {
     const [isChecked, setIsChecked] = useState(false);
     const [gender, setGender] = useState("");
     const [birthYear, setBirthYear] = useState("");
+    const [position, setPosition] = useState("");
+    const [isAccountCreated, setIsAccountCreated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+    const { user, isLoaded } = useUser();
+
+    // Check if user already has completed their profile
+    useEffect(() => {
+        const checkAccountStatus = async () => {
+            if (isLoaded && user) {
+                try {
+                    const response = await fetch(`/api/users?id=${user.id}`);
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success && data.data) {
+                        setIsAccountCreated(data.data.accountCreated);
+                        
+                        // Redirect if account is already created
+                        if (data.data.accountCreated) {
+                            router.push("/frontpage/Front");
+                        }
+                        
+                        // Pre-fill gender if available
+                        if (data.data.gender) {
+                            setGender(data.data.gender);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error checking account status:", error);
+                } finally {
+                    setIsLoading(false);
+                }
+            } else if (isLoaded && !user) {
+                setIsLoading(false);
+            }
+        };
+
+        checkAccountStatus();
+    }, [isLoaded, user, router]);
+
+    // Optional: Pre-fill gender if available from Clerk metadata
+    useEffect(() => {
+        if (isLoaded && user && !gender) {
+            const userGender = user.publicMetadata.gender as string;
+            if (userGender) {
+                setGender(userGender);
+            }
+        }
+    }, [isLoaded, user, gender]);
 
     const handleRedirect = async () => {
+        if (!isLoaded || !user) {
+            alert("User information not loaded yet. Please try again.");
+            return;
+        }
+
         if (!isChecked) {
             alert("Please check the box before redirecting");
             return;
         }
+
+        if (!position) {
+            alert("Please select your position (year)");
+            return;
+        }
+        
+        if (!gender) {
+            alert("Please select your gender");
+            return;
+        }
+        
+        if (!birthYear || isNaN(Number(birthYear))) {
+            alert("Please enter a valid birth year");
+            return;
+        }
     
         try {
-            const randomId = generateRandomString(5);
-            const response = await fetch("/api/saveUser", {
-                method: "POST",
+            // Get user details from Clerk
+            const firstName = user.firstName || "";
+            const lastName = user.lastName || "";
+            const email = user.primaryEmailAddress?.emailAddress || "";
+            
+            const response = await fetch("/api/users", {
+                method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    clerkId: generateRandomString(24),
-                    email: `user${randomId}@example.com`,
-                    first_name: `User${randomId}`,
-                    last_name: `Test`,
+                    id: user.id, // Use the actual Clerk user ID
+                    email: email,
+                    first_name: firstName,
+                    last_name: lastName,
                     gender,
-                    birthYear,
+                    position,
+                    year: parseInt(birthYear),
+                    accountCreated: true
                 }),
             });
     
@@ -53,8 +119,31 @@ export default function Home() {
         }
     };
     
+    if (isLoading) {
+        return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
+    }
+    
+    if (!isLoaded) {
+        return <div className="flex min-h-screen items-center justify-center">Loading user information...</div>;
+    }
+    
+    if (!user) {
+        router.push("/sign-in");
+        return null;
+    }
+    
+    if (isAccountCreated) {
+        router.push("/frontpage/Front");
+        return null;
+    }
+    
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-24">
+            <div className="mb-6 text-center">
+                <h1 className="text-2xl font-bold">Complete Your Profile</h1>
+                <p className="text-gray-600">We need a few more details to complete your account setup</p>
+            </div>
+
             {/* Multiple Choice Question */}
             <div className="mb-4">
                 <p className="text-lg font-semibold">What year are you?</p>
@@ -64,8 +153,10 @@ export default function Home() {
                             <input
                                 type="radio"
                                 name="quiz"
-                                value={option}
+                                value={option.toLowerCase()}
                                 className="cursor-pointer"
+                                checked={position === option.toLowerCase()}
+                                onChange={() => setPosition(option.toLowerCase())}
                             />
                             <span>{option}</span>
                         </label>
@@ -113,7 +204,7 @@ export default function Home() {
                     I agree to the terms and conditions
                 </label>
             </div>
-            <Button onClick={handleRedirect}>Redirect</Button>
+            <Button onClick={handleRedirect}>Complete Profile</Button>
         </main>
     );
 }
