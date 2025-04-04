@@ -10,12 +10,11 @@ export default function Home() {
   const [birthYear, setBirthYear] = useState("");
   const [position, setPosition] = useState("");
   const [isAccountCreated, setIsAccountCreated] = useState(false);
-  const [recordExists, setRecordExists] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { user, isLoaded } = useUser();
 
-  // Check if user already has completed their profile
+  // On mount, check if user profile exists and if account is complete
   useEffect(() => {
     const checkAccountStatus = async () => {
       if (isLoaded && user) {
@@ -23,20 +22,18 @@ export default function Home() {
           const response = await fetch(`/api/users?id=${user.id}`);
           const data = await response.json();
           if (response.ok && data.success && data.data) {
-            setRecordExists(true);
             setIsAccountCreated(data.data.accountCreated);
+            // Redirect if account is already created
             if (data.data.accountCreated) {
               router.push("/frontpage/Front");
             }
+            // Pre-fill gender if available
             if (data.data.gender) {
               setGender(data.data.gender);
             }
-          } else {
-            setRecordExists(false);
           }
         } catch (error) {
           console.error("Error checking account status:", error);
-          setRecordExists(false);
         } finally {
           setIsLoading(false);
         }
@@ -48,7 +45,7 @@ export default function Home() {
     checkAccountStatus();
   }, [isLoaded, user, router]);
 
-  // Optional: Pre-fill gender if available from Clerk metadata
+  // Optional: Pre-fill gender from Clerk metadata if available
   useEffect(() => {
     if (isLoaded && user && !gender) {
       const userGender = user.publicMetadata.gender as string;
@@ -59,6 +56,7 @@ export default function Home() {
   }, [isLoaded, user, gender]);
 
   const handleRedirect = async () => {
+    // Basic validations
     if (!isLoaded || !user) {
       alert("User information not loaded yet. Please try again.");
       return;
@@ -79,30 +77,35 @@ export default function Home() {
       alert("Please enter a valid birth year");
       return;
     }
-    try {
-      const firstName = user.firstName || "";
-      const lastName = user.lastName || "";
-      const email = user.primaryEmailAddress?.emailAddress || "";
 
-      // Use clerkId (not id) to match the schema requirement.
+    try {
+      // Re-check the existence of the user record immediately
+      let method = "POST";
+      try {
+        const checkResponse = await fetch(`/api/users?id=${user.id}`);
+        const checkData = await checkResponse.json();
+        if (checkResponse.ok && checkData.success && checkData.data) {
+          method = "PUT";
+        }
+      } catch (err) {
+        console.error("Error re-checking user existence:", err);
+      }
+
+      // Build payload using the correct field names
       const payload = {
         clerkId: user.id,
-        email,
-        first_name: firstName,
-        last_name: lastName,
+        email: user.primaryEmailAddress?.emailAddress || "",
+        first_name: user.firstName || "",
+        last_name: user.lastName || "",
         gender,
         position,
         year: parseInt(birthYear),
         accountCreated: true,
       };
 
-      // Use POST if record doesn't exist, otherwise update via PUT.
-      const method = recordExists ? "PUT" : "POST";
       const response = await fetch("/api/users", {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -111,8 +114,8 @@ export default function Home() {
         console.log("User saved successfully:", data);
         router.push("/frontpage/Front");
       } else {
-        console.error("Error saving user:", data.error);
-        alert("Error saving user: " + data.error);
+        console.error("Error saving user:", data.error || data.message);
+        alert("Error saving user: " + (data.error || data.message));
       }
     } catch (error) {
       console.error("Failed to send request:", error);
@@ -121,10 +124,18 @@ export default function Home() {
   };
 
   if (isLoading) {
-    return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
   }
   if (!isLoaded) {
-    return <div className="flex min-h-screen items-center justify-center">Loading user information...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Loading user information...
+      </div>
+    );
   }
   if (!user) {
     router.push("/sign-in");
@@ -142,6 +153,8 @@ export default function Home() {
           We need a few more details to complete your account setup
         </p>
       </div>
+
+      {/* Multiple Choice Question */}
       <div className="mb-4">
         <p className="text-lg font-semibold">What year are you?</p>
         <div className="space-y-2">
@@ -162,6 +175,8 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      {/* Gender Selection */}
       <div className="mb-4">
         <p className="text-lg font-semibold">Gender:</p>
         <select
@@ -175,6 +190,8 @@ export default function Home() {
           <option value="Other">Other</option>
         </select>
       </div>
+
+      {/* Year of Birth Input */}
       <div className="mb-4">
         <p className="text-lg font-semibold">Year of Birth:</p>
         <input
@@ -185,6 +202,7 @@ export default function Home() {
           placeholder="Enter your birth year"
         />
       </div>
+
       <div className="flex items-center space-x-2 mb-4">
         <Checkbox id="terms" checked={isChecked} onCheckedChange={setIsChecked} />
         <label
