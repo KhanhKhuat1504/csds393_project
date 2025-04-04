@@ -1,0 +1,120 @@
+import React from 'react';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, ChartData } from 'chart.js';
+
+// Register the required chart.js components
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+interface DemographicChartProps {
+  data: { [key: string]: number };
+  title: string;
+  type: 'gender' | 'position' | 'year';
+  isEnoughData: boolean;
+}
+
+// Color schemes by demographic type
+const colorSchemes = {
+  gender: {
+    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)'],
+    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)']
+  },
+  position: {
+    backgroundColor: [
+      'rgba(75, 192, 192, 0.6)', 
+      'rgba(153, 102, 255, 0.6)', 
+      'rgba(255, 159, 64, 0.6)',
+      'rgba(199, 199, 199, 0.6)',
+      'rgba(83, 102, 255, 0.6)',
+      'rgba(255, 99, 132, 0.6)'
+    ],
+    borderColor: [
+      'rgba(75, 192, 192, 1)', 
+      'rgba(153, 102, 255, 1)', 
+      'rgba(255, 159, 64, 1)',
+      'rgba(199, 199, 199, 1)',
+      'rgba(83, 102, 255, 1)',
+      'rgba(255, 99, 132, 1)'
+    ]
+  },
+  year: {
+    backgroundColor: [
+      'rgba(54, 162, 235, 0.6)',
+      'rgba(75, 192, 192, 0.6)',
+      'rgba(153, 102, 255, 0.6)',
+      'rgba(255, 159, 64, 0.6)',
+      'rgba(255, 99, 132, 0.6)',
+      'rgba(255, 206, 86, 0.6)'
+    ],
+    borderColor: [
+      'rgba(54, 162, 235, 1)',
+      'rgba(75, 192, 192, 1)',
+      'rgba(153, 102, 255, 1)',
+      'rgba(255, 159, 64, 1)',
+      'rgba(255, 99, 132, 1)',
+      'rgba(255, 206, 86, 1)'
+    ]
+  }
+};
+
+const DemographicChart: React.FC<DemographicChartProps> = ({ data, title, type, isEnoughData }) => {
+  if (!isEnoughData) {
+    return (
+      <div className="flex flex-col items-center justify-center h-40 bg-gray-50 rounded-lg p-4">
+        <h3 className="font-semibold text-gray-700 mb-2">{title}</h3>
+        <p className="text-sm text-gray-500">Not enough data</p>
+      </div>
+    );
+  }
+
+  // Convert data to ChartJS format
+  const chartData: ChartData<'pie'> = {
+    labels: Object.keys(data),
+    datasets: [
+      {
+        data: Object.values(data),
+        backgroundColor: colorSchemes[type].backgroundColor,
+        borderColor: colorSchemes[type].borderColor,
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  // Chart options
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+        labels: {
+          boxWidth: 12,
+          font: {
+            size: 10
+          }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            const label = context.label || '';
+            const value = context.raw || 0;
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const percentage = Math.round((value / total) * 100);
+            return `${label}: ${percentage}% (${value})`;
+          }
+        }
+      }
+    },
+  };
+
+  return (
+    <div className="flex flex-col items-center bg-white rounded-lg p-4 shadow-sm h-56">
+      <h3 className="font-semibold text-gray-700 mb-2">{title}</h3>
+      <div className="h-44 w-full">
+        <Pie data={chartData} options={options} />
+      </div>
+    </div>
+  );
+};
+
+export default DemographicChart; 
