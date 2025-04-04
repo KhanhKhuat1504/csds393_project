@@ -7,14 +7,17 @@ export default function Header() {
 
       <div className="absolute right-4 flex items-center gap-4">
         <SignedIn>
-          <UserButton
-            afterSignOutUrl="/"
-            appearance={{
-              elements: {
-                userButtonBox: "focus:ring-4 focus:ring-indigo-500"
-              }
-            }}
-          />
+          <div className="bg-white px-2 py-1 rounded-lg">
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "w-10 h-10",
+                  userButtonBox: "hover:opacity-80"
+                }
+              }}
+            />
+          </div>
         </SignedIn>
       </div>
     </header>

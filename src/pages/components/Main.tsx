@@ -24,11 +24,12 @@ export default function Login() {
           />
         </div>
         */}
-        <button className="w-full px-4 py-2 mt-6 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-          <a href="/sign-up" className="text-white hover:underline">
-            Sign up/Sign in
-          </a>
-        </button>
+        <a 
+          href="/sign-up" 
+          className="block w-full px-4 py-2 mt-6 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 text-center"
+        >
+          Sign up/Sign in
+        </a>
         <div className="mt-2 text-center">
           <a href="/forgot-password" className="text-blue-600 hover:underline">
             Forgot password?
