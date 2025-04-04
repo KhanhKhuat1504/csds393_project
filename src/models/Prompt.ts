@@ -2,6 +2,9 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IPrompt extends Document {
+  createdBy: string;
+  isReported: boolean;
+  isArchived: boolean;
   promptQuestion: string;
   resp1: string;
   resp2: string;
@@ -15,6 +18,9 @@ const PromptSchema: Schema = new mongoose.Schema({
   resp2: { type: String },
   resp3: { type: String },
   resp4: { type: String },
+  createdBy: { type: String, required: true },
+  isReported: { type: Boolean, default: false },
+  isArchived: { type: Boolean, default: false },
 });
 
 // Check if the model already exists (to prevent OverwriteModelError)
