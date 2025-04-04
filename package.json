@@ -17,6 +17,7 @@
     "chart.js": "^4.4.8",
     "classnames": "^2.3.2",
     "dotenv": "^16.4.7",
+    "google-auth-library": "^9.15.1",
     "mongoose": "^8.12.1",
     "next": "^13.5.8",
     "postcss": "^8",
