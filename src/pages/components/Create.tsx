@@ -79,13 +79,17 @@ export default function Home() {
     }
 
     try {
-      // Re-check the existence of the user record immediately
+      // Re-check the existence of the user record immediately.
+      // If the GET returns a 404 (user not found), we'll use POST.
       let method = "POST";
       try {
         const checkResponse = await fetch(`/api/users?id=${user.id}`);
-        const checkData = await checkResponse.json();
-        if (checkResponse.ok && checkData.success && checkData.data) {
-          method = "PUT";
+        // If the status is 404, it means no user record exists yet.
+        if (checkResponse.status !== 404) {
+          const checkData = await checkResponse.json();
+          if (checkResponse.ok && checkData.success && checkData.data) {
+            method = "PUT";
+          }
         }
       } catch (err) {
         console.error("Error re-checking user existence:", err);
