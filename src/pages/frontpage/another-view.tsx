@@ -280,9 +280,17 @@ export default function AnotherView() {
         <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold">
           CaseAsk - Reported Prompts
         </h1>
-        <div className="ml-auto bg-black text-white px-4 py-2 rounded-lg shadow-md">
+        <div className="ml-auto bg-white px-2 py-1 rounded-lg">
           <SignedIn>
-            <UserButton afterSignOutUrl="/" />
+            <UserButton 
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "w-10 h-10",
+                  userButtonBox: "hover:opacity-80"
+                }
+              }}
+            />
           </SignedIn>
         </div>
       </header>

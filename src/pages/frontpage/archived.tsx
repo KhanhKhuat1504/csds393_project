@@ -1,6 +1,6 @@
 import { SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import PromptResponseStats from "../../components/PromptResponseStats";
 
 interface Prompt {
@@ -30,9 +30,12 @@ export default function Archived() {
   const { isSignedIn, user } = useUser();
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
+  const [hoveredResponse, setHoveredResponse] = useState<string | null>(null);
+  const [previewResponse, setPreviewResponse] = useState<string | null>(null);
   const [isMod, setIsMod] = useState(false);
   const [userResponses, setUserResponses] = useState<{ [promptId: string]: string }>({});
   const [loadingResponses, setLoadingResponses] = useState(false);
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
     const checkModStatus = async () => {
@@ -257,6 +260,37 @@ export default function Archived() {
     return !!userResponses[promptId];
   };
 
+  const handlePreviewClick = (response: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the regular response click
+    console.log("Preview clicked:", response, "Current preview:", previewResponse);
+    
+    // Toggle the preview response
+    if (previewResponse === response) {
+      setPreviewResponse(null);
+    } else {
+      setPreviewResponse(response);
+    }
+  };
+
+  // Calculate percentage for an answer
+  const calculatePercentage = (response: string): number => {
+    if (!stats || !stats.answerStats || !stats.answerStats[response]) {
+      return 0;
+    }
+    
+    const totalResponses = stats.responseCount;
+    const responseCount = stats.answerStats[response].count;
+    
+    if (totalResponses === 0) return 0;
+    
+    return Math.round((responseCount / totalResponses) * 100);
+  };
+
+  // Handle stats loaded from child component
+  const handleStatsLoaded = useCallback((newStats: any) => {
+    setStats(newStats);
+  }, []);
+
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-green-50 px-4 pt-12">
       <header className="fixed top-0 left-0 w-full py-4 bg-green-600 text-white shadow-md flex items-center justify-between px-6 z-50">
@@ -268,9 +302,17 @@ export default function Archived() {
         <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold">
           CaseAsk - Archived Prompts
         </h1>
-        <div className="ml-auto bg-black text-white px-4 py-2 rounded-lg shadow-md">
+        <div className="ml-auto bg-white px-2 py-1 rounded-lg">
           <SignedIn>
-            <UserButton afterSignOutUrl="/" />
+            <UserButton 
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "w-10 h-10",
+                  userButtonBox: "hover:opacity-80"
+                }
+              }}
+            />
           </SignedIn>
         </div>
       </header>
@@ -292,31 +334,52 @@ export default function Archived() {
                 const isDisabled = isResponseDisabled(selectedPrompt._id) && selectedResponse !== response;
                 const isSelected = selectedResponse === response;
                 return (
-                  <button
-                    key={index}
-                    className={`p-4 rounded-lg shadow w-full border-2 transition-colors ${
-                      isSelected 
-                        ? 'border-green-800 bg-green-200' 
-                        : isDisabled
-                        ? "border-transparent bg-gray-300 opacity-50 cursor-not-allowed"
-                        : 'border-transparent bg-gray-200 hover:bg-gray-300'
-                    }`}
-                    onClick={() => handleResponseClick(response)}
-                    disabled={isDisabled}
-                  >
-                    {response}
-                    {isSelected && (
-                      <div className="mt-2 text-sm font-medium text-green-800">
-                        Your selection
+                  <div key={index} className="relative">
+                    <button
+                      className={`p-4 rounded-lg shadow w-full border-2 transition-colors ${
+                        isSelected 
+                          ? 'border-green-800 bg-green-200' 
+                          : isDisabled
+                          ? "border-transparent bg-gray-300 opacity-50 cursor-not-allowed"
+                          : 'border-transparent bg-gray-200 hover:bg-gray-300'
+                      }`}
+                      onClick={() => handleResponseClick(response)}
+                      onMouseEnter={() => setHoveredResponse(response)}
+                      onMouseLeave={() => setHoveredResponse(null)}
+                      disabled={isDisabled}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span>{response}</span>
                       </div>
+                      {isSelected && (
+                        <div className="mt-2 text-sm font-medium text-green-800">
+                          Your selection
+                        </div>
+                      )}
+                    </button>
+                    {isDisabled && !isSelected && (
+                      <button 
+                        onClick={(e) => handlePreviewClick(response, e)}
+                        className={`absolute right-2 top-2 px-2 py-1 text-xs rounded z-10 ${previewResponse === response ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                      >
+                        {previewResponse === response ? 'Hide Stats' : 'View Stats'}
+                      </button>
                     )}
-                  </button>
+                    {isSelected && (
+                      <button 
+                        onClick={(e) => handlePreviewClick(response, e)}
+                        className={`absolute right-2 top-2 px-2 py-1 text-xs rounded z-10 ${previewResponse === response ? 'bg-green-500 text-white' : 'bg-green-200 text-green-700'}`}
+                      >
+                        {previewResponse === response ? 'Hide Stats' : 'View Stats'}
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>
             {selectedResponse && (
               <div className="mt-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700">
-                Example result: <span className="font-bold">{Math.floor(Math.random() * 100)}%</span>
+                Result: <span className="font-bold">{stats ? calculatePercentage(selectedResponse) : "Loading..."}%</span>
               </div>
             )}
             {isResponseDisabled(selectedPrompt._id) && (
@@ -325,11 +388,20 @@ export default function Archived() {
               </div>
             )}
             
+            {selectedResponse && (
+              <div className="mt-2 p-2 bg-green-50 text-green-600 rounded text-center text-sm">
+                Click "View Stats" on other responses to see their demographic data
+              </div>
+            )}
+            
             {/* Display demographics charts if user has responded */}
             {selectedResponse && (
               <PromptResponseStats 
                 promptId={selectedPrompt._id} 
-                selectedResponse={selectedResponse} 
+                selectedResponse={selectedResponse}
+                hoveredResponse={hoveredResponse}
+                previewResponse={previewResponse}
+                onStatsLoaded={handleStatsLoaded}
               />
             )}
           </div>

@@ -105,8 +105,8 @@ export default async function handler(
     // Calculate total responses
     const totalResponses = responses.length;
     
-    // Check if there's enough data - minimum 2 responses per answer for privacy
-    const hasEnoughData = Object.values(answerStats).every(stat => stat.count >= 2);
+    // Always show data regardless of response count (minimum is 1)
+    const hasEnoughData = totalResponses > 0;
 
     // Return the answer stats
     return res.status(200).json({
