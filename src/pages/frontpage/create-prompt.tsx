@@ -62,13 +62,15 @@ export default function CreatePrompt() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 pt-12">
       {/* Header */}
-      <header className="fixed top-0 left-0 w-full py-4 bg-blue-600 text-white shadow-md flex items-center justify-between px-6">
+      <header className="fixed top-0 left-0 w-full py-4 bg-blue-600 text-white shadow-md flex items-center justify-between px-6 z-50">
         <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold">
           CaseAsk
         </h1>
         <div className="ml-auto bg-black text-white px-4 py-2 rounded-lg shadow-md">
           <SignedIn>
-           
+            <div className="hidden sm:block">
+              <OrganizationSwitcher afterCreateOrganizationUrl="/dashboard" />
+            </div>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </div>

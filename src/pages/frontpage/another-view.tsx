@@ -161,7 +161,7 @@ export default function AnotherView() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-red-50 px-4 pt-12">
-      <header className="fixed top-0 left-0 w-full py-4 bg-red-700 text-white shadow-md flex items-center justify-between px-6">
+      <header className="fixed top-0 left-0 w-full py-4 bg-red-700 text-white shadow-md flex items-center justify-between px-6 z-50">
         <Link href="/frontpage/Front">
           <button className="px-3 py-1 bg-white text-red-700 rounded-md hover:bg-gray-100">
             Main View
@@ -177,7 +177,7 @@ export default function AnotherView() {
         </div>
       </header>
 
-      <div className="container mx-auto max-w-3xl mt-12 p-6 bg-white rounded-xl shadow-lg">
+      <div className="container mx-auto max-w-3xl mt-16 p-6 bg-white rounded-xl shadow-lg">
         {selectedPrompt ? (
           <div className="w-full">
             <button

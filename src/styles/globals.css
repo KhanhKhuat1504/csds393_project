@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure fixed headers are always on top */
+header.fixed {
+  z-index: 50 !important;
+}
+
 .gradient {
   position: relative;
   background-image: repeating-linear-gradient(

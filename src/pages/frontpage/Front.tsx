@@ -207,7 +207,7 @@ export default function Front() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 pt-12">
-      <header className="fixed top-0 left-0 w-full py-4 bg-blue-600 text-white shadow-md flex items-center justify-between px-6">
+      <header className="fixed top-0 left-0 w-full py-4 bg-blue-600 text-white shadow-md flex items-center justify-between px-6 z-50">
         {isMod && (
           <Link href="/frontpage/another-view">
             <button className="px-3 py-1 bg-white text-blue-600 rounded-md hover:bg-gray-100">
@@ -225,7 +225,7 @@ export default function Front() {
         </div>
       </header>
 
-      <div className="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 flex flex-col items-center mt-8">
+      <div className="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 flex flex-col items-center mt-16">
         {selectedPrompt ? (
           <div className="w-full">
             <button
