@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '../../lib/dbConnect';
 import Prompt from '../../models/Prompt';
+import { isInappropriate } from '@/lib/moderation';
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,8 +15,30 @@ export default async function handler(
 
   if (req.method === 'POST') {
     try {
-      // Create a new prompt
+      const { promptQuestion, resp1, resp2, resp3, resp4 } = req.body;
+      let autoFlagged = false;
+      const textsToCheck = [promptQuestion, resp1, resp2, resp3, resp4].filter(Boolean);
+
+      // Check each text for inappropriate content
+      for (const text of textsToCheck) {
+        if (await isInappropriate(text)) {
+          autoFlagged = true;
+          console.log(`Inappropriate content detected in text: "${text}"`);
+          break;
+        }
+      }
+      // Add the auto flag status to the request body
+      req.body.isAutoFlagged = autoFlagged;
+      // Create the new prompt in the database
       const newPrompt = await Prompt.create(req.body);
+      // If the prompt is auto flagged, return a special message to the user
+      if (autoFlagged) {
+        return res.status(201).json({
+          success: true,
+          message: "Your prompt has been flagged and is pending moderator review.",
+          data: newPrompt,
+        });
+      }
       res.status(201).json({ success: true, data: newPrompt });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });

@@ -4,22 +4,23 @@ import { useState, useEffect, useCallback } from "react";
 import PromptResponseStats from "../../components/PromptResponseStats";
 
 interface Prompt {
-  _id: string;
-  promptQuestion: string;
-  resp1: string;
-  resp2: string;
-  resp3: string;
-  resp4: string;
-  isArchived?: boolean;
-  isReported?: boolean;
+    _id: string;
+    promptQuestion: string;
+    resp1: string;
+    resp2: string;
+    resp3: string;
+    resp4: string;
+    isArchived?: boolean;
+    isReported?: boolean;
+    isAutoFlagged?: boolean;
 }
 
 interface UserResponseData {
-  _id: string;
-  userId: string;
-  promptId: string;
-  selectedResponse: string;
-  responseDate: Date;
+    _id: string;
+    userId: string;
+    promptId: string;
+    selectedResponse: string;
+    responseDate: Date;
 }
 
 export default function AnotherView() {
@@ -36,83 +37,89 @@ export default function AnotherView() {
   const [loadingResponses, setLoadingResponses] = useState(false);
   const [stats, setStats] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchPrompts = async () => {
-      if (!isSignedIn) return;
-      setLoading(true);
-      try {
-        const token = await getToken();
-        if (!token) {
-          setError("No valid token available");
-          setLoading(false);
-          return;
-        }
-        const headers = { Authorization: `Bearer ${token}` };
-        const res = await fetch("/api/prompt", { headers });
-        if (!res.ok) {
-          const errMsg = await res.text();
-          throw new Error(`Failed to fetch prompts: ${res.status} ${errMsg}`);
-        }
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          setPrompts(data.data);
-        } else {
-          setError("Invalid data format received from API");
-        }
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    useEffect(() => {
+        const fetchPrompts = async () => {
+            if (!isSignedIn) return;
+            setLoading(true);
+            try {
+                const token = await getToken();
+                if (!token) {
+                    setError("No valid token available");
+                    setLoading(false);
+                    return;
+                }
+                const headers = { Authorization: `Bearer ${token}` };
+                const res = await fetch("/api/prompt", { headers });
+                if (!res.ok) {
+                    const errMsg = await res.text();
+                    throw new Error(
+                        `Failed to fetch prompts: ${res.status} ${errMsg}`
+                    );
+                }
+                const data = await res.json();
+                if (data.success && Array.isArray(data.data)) {
+                    setPrompts(data.data);
+                } else {
+                    setError("Invalid data format received from API");
+                }
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    fetchPrompts();
-  }, [getToken, isSignedIn]);
+        fetchPrompts();
+    }, [getToken, isSignedIn]);
 
-  // Fetch all user responses when logged in
-  useEffect(() => {
-    const fetchUserResponses = async () => {
-      if (!isSignedIn || !user) return;
-      
-      setLoadingResponses(true);
-      try {
-        const token = await getToken();
-        if (!token) {
-          setLoadingResponses(false);
-          return;
+    // Fetch all user responses when logged in
+    useEffect(() => {
+        const fetchUserResponses = async () => {
+            if (!isSignedIn || !user) return;
+
+            setLoadingResponses(true);
+            try {
+                const token = await getToken();
+                if (!token) {
+                    setLoadingResponses(false);
+                    return;
+                }
+
+                const headers = { Authorization: `Bearer ${token}` };
+                const res = await fetch(
+                    `/api/user-responses?userId=${user.id}`,
+                    { headers }
+                );
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && Array.isArray(data.data)) {
+                        // Convert array of responses to a map of promptId -> selectedResponse
+                        const responsesMap: { [promptId: string]: string } = {};
+                        data.data.forEach((response: UserResponseData) => {
+                            responsesMap[response.promptId] =
+                                response.selectedResponse;
+                        });
+                        setUserResponses(responsesMap);
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching user responses:", err);
+            } finally {
+                setLoadingResponses(false);
+            }
+        };
+
+        fetchUserResponses();
+    }, [isSignedIn, user, getToken]);
+
+    useEffect(() => {
+        if (!isSignedIn) {
+            setPrompts([]);
+            setError("");
+            setUserResponses({});
         }
-        
-        const headers = { Authorization: `Bearer ${token}` };
-        const res = await fetch(`/api/user-responses?userId=${user.id}`, { headers });
-        
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && Array.isArray(data.data)) {
-            // Convert array of responses to a map of promptId -> selectedResponse
-            const responsesMap: { [promptId: string]: string } = {};
-            data.data.forEach((response: UserResponseData) => {
-              responsesMap[response.promptId] = response.selectedResponse;
-            });
-            setUserResponses(responsesMap);
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching user responses:", err);
-      } finally {
-        setLoadingResponses(false);
-      }
-    };
-
-    fetchUserResponses();
-  }, [isSignedIn, user, getToken]);
-
-  useEffect(() => {
-    if (!isSignedIn) {
-      setPrompts([]);
-      setError("");
-      setUserResponses({});
-    }
-  }, [isSignedIn]);
+    }, [isSignedIn]);
 
   // When a prompt is selected, set selected response from user responses if available
   useEffect(() => {
@@ -143,14 +150,14 @@ export default function AnotherView() {
     }
   }, [selectedPrompt, userResponses]);
 
-  const handlePromptClick = (prompt: Prompt) => {
-    setSelectedPrompt(prompt);
-  };
+    const handlePromptClick = (prompt: Prompt) => {
+        setSelectedPrompt(prompt);
+    };
 
-  const handleBackClick = () => {
-    setSelectedPrompt(null);
-    setSelectedResponse(null);
-  };
+    const handleBackClick = () => {
+        setSelectedPrompt(null);
+        setSelectedResponse(null);
+    };
 
   const handleResponseClick = async (response: string) => {
     // If user has already responded to this prompt, don't allow changing the answer
@@ -225,88 +232,100 @@ export default function AnotherView() {
     }
   };
 
-  const handleClearReportedPrompt = async (promptId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering prompt selection
-    
-    if (!isSignedIn) return;
-    
-    try {
-      const token = await getToken();
-      if (!token) {
-        setError("No valid token available");
-        return;
-      }
-      
-      const headers = { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      
-      const res = await fetch("/api/prompt", {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({
-          id: promptId,
-          isReported: false
-        })
-      });
-      
-      if (!res.ok) {
-        const errMsg = await res.text();
-        throw new Error(`Failed to clear reported status: ${res.status} ${errMsg}`);
-      }
-      
-      // Update the local state
-      setPrompts(prevPrompts => 
-        prevPrompts.map(p => 
-          p._id === promptId ? { ...p, isReported: false } : p
-        )
-      );
-      
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
+    const handleClearReportedPrompt = async (
+        promptId: string,
+        e: React.MouseEvent
+    ) => {
+        e.stopPropagation(); // Prevent triggering prompt selection
 
-  const handleDeletePrompt = async (promptId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering prompt selection
-    
-    if (!isSignedIn) return;
-    
-    if (!confirm("Are you sure you want to delete this prompt? This action cannot be undone.")) {
-      return;
-    }
-    
-    try {
-      const token = await getToken();
-      if (!token) {
-        setError("No valid token available");
-        return;
-      }
-      
-      const headers = { 
-        'Authorization': `Bearer ${token}`
-      };
-      
-      const res = await fetch(`/api/prompt?id=${promptId}`, {
-        method: 'DELETE',
-        headers
-      });
-      
-      if (!res.ok) {
-        const errMsg = await res.text();
-        throw new Error(`Failed to delete prompt: ${res.status} ${errMsg}`);
-      }
-      
-      // Update the local state - remove the deleted prompt
-      setPrompts(prevPrompts => 
-        prevPrompts.filter(p => p._id !== promptId)
-      );
-      
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
+        if (!isSignedIn) return;
+
+        try {
+            const token = await getToken();
+            if (!token) {
+                setError("No valid token available");
+                return;
+            }
+
+            const headers = {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            };
+
+            const res = await fetch("/api/prompt", {
+                method: "PUT",
+                headers,
+                body: JSON.stringify({
+                    id: promptId,
+                    isReported: false,
+                }),
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(
+                    `Failed to clear reported status: ${res.status} ${errMsg}`
+                );
+            }
+
+            // Update the local state
+            setPrompts((prevPrompts) =>
+                prevPrompts.map((p) =>
+                    p._id === promptId ? { ...p, isReported: false } : p
+                )
+            );
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const handleDeletePrompt = async (
+        promptId: string,
+        e: React.MouseEvent
+    ) => {
+        e.stopPropagation(); // Prevent triggering prompt selection
+
+        if (!isSignedIn) return;
+
+        if (
+            !confirm(
+                "Are you sure you want to delete this prompt? This action cannot be undone."
+            )
+        ) {
+            return;
+        }
+
+        try {
+            const token = await getToken();
+            if (!token) {
+                setError("No valid token available");
+                return;
+            }
+
+            const headers = {
+                Authorization: `Bearer ${token}`,
+            };
+
+            const res = await fetch(`/api/prompt?id=${promptId}`, {
+                method: "DELETE",
+                headers,
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(
+                    `Failed to delete prompt: ${res.status} ${errMsg}`
+                );
+            }
+
+            // Update the local state - remove the deleted prompt
+            setPrompts((prevPrompts) =>
+                prevPrompts.filter((p) => p._id !== promptId)
+            );
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
 
   // Helper function to determine if a response is disabled
   const isResponseDisabled = (promptId: string): boolean => {
@@ -332,31 +351,31 @@ export default function AnotherView() {
     setStats(newStats);
   }, []);
 
-  return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-red-50 px-4 pt-12">
-      <header className="fixed top-0 left-0 w-full py-4 bg-red-700 text-white shadow-md flex items-center justify-between px-6 z-50">
-        <Link href="/frontpage/Front">
-          <button className="px-3 py-1 bg-white text-red-700 rounded-md hover:bg-gray-100">
-            Main View
-          </button>
-        </Link>
-        <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold">
-          CaseAsk - Reported Prompts
-        </h1>
-        <div className="ml-auto bg-white px-2 py-1 rounded-lg">
-          <SignedIn>
-            <UserButton 
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: "w-10 h-10",
-                  userButtonBox: "hover:opacity-80"
-                }
-              }}
-            />
-          </SignedIn>
-        </div>
-      </header>
+    return (
+        <main className="flex flex-col items-center justify-center min-h-screen bg-red-50 px-4 pt-12">
+            <header className="fixed top-0 left-0 w-full py-4 bg-red-700 text-white shadow-md flex items-center justify-between px-6 z-50">
+                <Link href="/frontpage/Front">
+                    <button className="px-3 py-1 bg-white text-red-700 rounded-md hover:bg-gray-100">
+                        Main View
+                    </button>
+                </Link>
+                <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold">
+                    CaseAsk - Reported Prompts
+                </h1>
+                <div className="ml-auto bg-white px-2 py-1 rounded-lg">
+                    <SignedIn>
+                        <UserButton
+                            afterSignOutUrl="/"
+                            appearance={{
+                                elements: {
+                                    userButtonAvatarBox: "w-10 h-10",
+                                    userButtonBox: "hover:opacity-80",
+                                },
+                            }}
+                        />
+                    </SignedIn>
+                </div>
+            </header>
 
       <div className="container mx-auto max-w-3xl mt-16 p-6 bg-white rounded-xl shadow-lg">
         {selectedPrompt ? (

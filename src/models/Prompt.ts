@@ -5,6 +5,7 @@ export interface IPrompt extends Document {
   createdBy: string;
   isReported: boolean;
   isArchived: boolean;
+  isAutoFlagged: boolean;
   promptQuestion: string;
   resp1: string;
   resp2: string;
@@ -21,6 +22,7 @@ const PromptSchema: Schema = new mongoose.Schema({
   createdBy: { type: String, required: true },
   isReported: { type: Boolean, default: false },
   isArchived: { type: Boolean, default: false },
+  isAutoFlagged: { type: Boolean, default: false }
 });
 
 // Check if the model already exists (to prevent OverwriteModelError)
