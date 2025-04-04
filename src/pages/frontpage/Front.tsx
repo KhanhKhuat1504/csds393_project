@@ -10,56 +10,48 @@ interface Prompt {
   resp2: string;
   resp3: string;
   resp4: string;
+  isArchived?: boolean;
+  isReported?: boolean;
 }
-
-interface PieChartProps {
-  percentage: number;
-}
-
-const PieChart = ({ percentage }: PieChartProps) => {
-  const radius = 20;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percentage / 100) * circumference;
-  return (
-    <svg width="50" height="50">
-      {/* Background circle */}
-      <circle
-        cx="25"
-        cy="25"
-        r={radius}
-        fill="none"
-        stroke="#e5e7eb"
-        strokeWidth="5"
-      />
-      {/* Foreground arc */}
-      <circle
-        cx="25"
-        cy="25"
-        r={radius}
-        fill="none"
-        stroke="#3b82f6"
-        strokeWidth="5"
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        transform="rotate(-90 25 25)"
-      />
-      <text x="25" y="30" textAnchor="middle" fontSize="12" fill="#111827">
-        {percentage}%
-      </text>
-    </svg>
-  );
-};
 
 export default function Front() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { getToken } = useAuth();
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
   const [hoveredResponse, setHoveredResponse] = useState<string | null>(null);
   const [responsePercentages, setResponsePercentages] = useState<{ [key: string]: number }>({});
+  const [isMod, setIsMod] = useState(false);
+
+  useEffect(() => {
+    const checkModStatus = async () => {
+      if (isSignedIn && user) {
+        try {
+          // Fetch user data to check if user is a moderator
+          const token = await getToken();
+          if (!token) return;
+          
+          const response = await fetch(`/api/users?id=${user.id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (response.ok) {
+            const userData = await response.json();
+            if (userData.success && userData.data) {
+              setIsMod(userData.data.isMod === true);
+            }
+          }
+        } catch (err) {
+          console.error("Error checking moderator status:", err);
+        }
+      }
+    };
+    
+    checkModStatus();
+  }, [isSignedIn, user, getToken]);
 
   useEffect(() => {
     const fetchPrompts = async () => {
@@ -127,15 +119,103 @@ export default function Front() {
     setSelectedResponse(response);
   };
 
+  const handleReportPrompt = async (promptId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering prompt selection
+    
+    if (!isSignedIn) return;
+    
+    try {
+      const token = await getToken();
+      if (!token) {
+        setError("No valid token available");
+        return;
+      }
+      
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      
+      const res = await fetch("/api/prompt", {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({
+          id: promptId,
+          isReported: true
+        })
+      });
+      
+      if (!res.ok) {
+        const errMsg = await res.text();
+        throw new Error(`Failed to report prompt: ${res.status} ${errMsg}`);
+      }
+      
+      // Update the local state
+      setPrompts(prevPrompts => 
+        prevPrompts.map(p => 
+          p._id === promptId ? { ...p, isReported: true } : p
+        )
+      );
+      
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleArchivePrompt = async (promptId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering prompt selection
+    
+    if (!isSignedIn) return;
+    
+    try {
+      const token = await getToken();
+      if (!token) {
+        setError("No valid token available");
+        return;
+      }
+      
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      
+      const res = await fetch("/api/prompt", {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({
+          id: promptId,
+          isArchived: true
+        })
+      });
+      
+      if (!res.ok) {
+        const errMsg = await res.text();
+        throw new Error(`Failed to archive prompt: ${res.status} ${errMsg}`);
+      }
+      
+      // Update the local state
+      setPrompts(prevPrompts => 
+        prevPrompts.map(p => 
+          p._id === promptId ? { ...p, isArchived: true } : p
+        )
+      );
+      
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 pt-12">
       <header className="fixed top-0 left-0 w-full py-4 bg-blue-600 text-white shadow-md flex items-center justify-between px-6">
-        <Link href="/frontpage/alternate-front">
-          <button className="px-3 py-1 bg-white text-blue-600 rounded-md hover:bg-gray-100">
-            Alt View
-          </button>
-        </Link>
-        <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold">
+        {isMod && (
+          <Link href="/frontpage/another-view">
+            <button className="px-3 py-1 bg-white text-blue-600 rounded-md hover:bg-gray-100">
+              Reported
+            </button>
+          </Link>
+        )}
+        <h1 className={`${isMod ? 'absolute left-1/2 transform -translate-x-1/2' : ''} text-2xl font-bold`}>
           CaseAsk
         </h1>
         <div className="ml-auto bg-black text-white px-4 py-2 rounded-lg shadow-md">
@@ -175,11 +255,6 @@ export default function Front() {
               ))}
             </div>
             {/* Dedicated area for the pie chart */}
-            <div className="mt-4 flex items-center justify-center h-24">
-              {hoveredResponse && (
-                <PieChart percentage={responsePercentages[hoveredResponse] || 0} />
-              )}
-            </div>
             {selectedResponse && (
               <div className="mt-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
                 Example result:{" "}
@@ -201,15 +276,33 @@ export default function Front() {
             {!loading && !error && (
               <div className="w-full space-y-4">
                 {prompts.length > 0 ? (
-                  prompts.map((prompt) => (
+                  prompts
+                    .filter(prompt => !prompt.isArchived)
+                    .map((prompt) => (
                     <div
                       key={prompt._id}
-                      className="cursor-pointer p-4 bg-white rounded-lg shadow border hover:bg-gray-50"
+                      className="cursor-pointer p-4 bg-white rounded-lg shadow border hover:bg-gray-50 relative"
                       onClick={() => handlePromptClick(prompt)}
                     >
-                      <h3 className="text-lg font-semibold">
+                      <h3 className="text-lg font-semibold pr-24">
                         {prompt.promptQuestion}
                       </h3>
+                      <div className="absolute top-4 right-4 flex space-x-2">
+                        <button
+                          onClick={(e) => handleReportPrompt(prompt._id, e)}
+                          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                        >
+                          Report
+                        </button>
+                        {isMod && (
+                          <button
+                            onClick={(e) => handleArchivePrompt(prompt._id, e)}
+                            className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
+                          >
+                            Archive
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -219,18 +312,20 @@ export default function Front() {
                 )}
               </div>
             )}
-            <div className="flex gap-4 mt-4">
-              <Link href="/frontpage/create-prompt">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md">
-                  Create
-                </button>
-              </Link>
-              <Link href="/frontpage/another-view">
-                <button className="px-4 py-2 bg-green-600 text-white rounded-md">
-                  Another View
-                </button>
-              </Link>
-            </div>
+            {!selectedPrompt && (
+              <div className="flex gap-4 mt-4">
+                <Link href="/frontpage/create-prompt">
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-md">
+                    Create
+                  </button>
+                </Link>
+                <Link href="/frontpage/archived">
+                  <button className="px-4 py-2 bg-green-600 text-white rounded-md">
+                    Archived
+                  </button>
+                </Link>
+              </div>
+            )}
           </>
         )}
       </div>
