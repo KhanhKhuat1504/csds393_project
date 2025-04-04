@@ -1,4 +1,4 @@
-// components/Front.tsx
+// components/AlternateFront.tsx
 import { SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -12,7 +12,7 @@ interface Prompt {
   resp4: string;
 }
 
-export default function Front() {
+export default function AlternateFront() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -76,15 +76,15 @@ export default function Front() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 pt-12">
-      <header className="fixed top-0 left-0 w-full py-4 bg-blue-600 text-white shadow-md flex items-center justify-between px-6">
-        <Link href="/frontpage/alternate-front">
-          <button className="px-3 py-1 bg-white text-blue-600 rounded-md hover:bg-gray-100">
-            Alt View
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-200 px-4 pt-12">
+      <header className="fixed top-0 left-0 w-full py-4 bg-indigo-700 text-white shadow-md flex items-center justify-between px-6">
+        <Link href="/frontpage/Front">
+          <button className="px-3 py-1 bg-white text-indigo-700 rounded-md hover:bg-gray-100">
+            Main View
           </button>
         </Link>
         <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl font-bold">
-          CaseAsk
+          CaseAsk - Alternate View
         </h1>
         <div className="ml-auto bg-black text-white px-4 py-2 rounded-lg shadow-md">
           <SignedIn>
@@ -93,11 +93,11 @@ export default function Front() {
         </div>
       </header>
 
-      <div className="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 flex flex-col items-center mt-8">
+      <div className="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 flex flex-col items-center mt-8 border-2 border-indigo-300">
         {selectedPrompt ? (
           <div className="w-full">
             <button
-              className="mb-4 text-blue-600 hover:underline"
+              className="mb-4 text-indigo-600 hover:underline"
               onClick={handleBackClick}
             >
               &larr; Back
@@ -109,7 +109,7 @@ export default function Front() {
               {[selectedPrompt.resp1, selectedPrompt.resp2, selectedPrompt.resp3, selectedPrompt.resp4].map((response, index) => (
                 <button
                   key={index}
-                  className={`p-4 rounded-lg shadow w-full border-2 transition-colors ${selectedResponse === response ? 'border-blue-800 bg-blue-300' : 'border-transparent bg-gray-200 hover:bg-gray-300'}`}
+                  className={`p-4 rounded-lg shadow w-full border-2 transition-colors ${selectedResponse === response ? 'border-indigo-800 bg-indigo-200' : 'border-transparent bg-gray-200 hover:bg-gray-300'}`}
                   onClick={() => handleResponseClick(response)}
                 >
                   {response}
@@ -117,14 +117,14 @@ export default function Front() {
               ))}
             </div>
             {selectedResponse && (
-              <div className="mt-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
+              <div className="mt-4 p-4 bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700">
                 Example result: <span className="font-bold">{Math.floor(Math.random() * 100)}%</span>
               </div>
             )}
           </div>
         ) : (
           <>
-            <h2 className="text-xl font-semibold text-center text-gray-800 mb-4">Prompts</h2>
+            <h2 className="text-xl font-semibold text-center text-indigo-800 mb-4">Alternative Prompts View</h2>
             {loading && <p>Loading prompts...</p>}
             {error && <p className="text-red-600">{error}</p>}
             {!loading && !error && (
@@ -133,7 +133,7 @@ export default function Front() {
                   prompts.map((prompt) => (
                     <div
                       key={prompt._id}
-                      className="cursor-pointer p-4 bg-white rounded-lg shadow border hover:bg-gray-50"
+                      className="cursor-pointer p-4 bg-white rounded-lg shadow border-2 border-indigo-200 hover:bg-indigo-50"
                       onClick={() => handlePromptClick(prompt)}
                     >
                       <h3 className="text-lg font-semibold">
@@ -148,13 +148,13 @@ export default function Front() {
             )}
             <div className="flex gap-4 mt-4">
               <Link href="/frontpage/create-prompt">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md">
+                <button className="px-4 py-2 bg-indigo-600 text-white rounded-md">
                   Create
                 </button>
               </Link>
-              <Link href="/frontpage/another-view">
-                <button className="px-4 py-2 bg-green-600 text-white rounded-md">
-                  Another View
+              <Link href="/frontpage/Front">
+                <button className="px-4 py-2 bg-gray-600 text-white rounded-md">
+                  Return to Main View
                 </button>
               </Link>
             </div>
@@ -163,4 +163,4 @@ export default function Front() {
       </div>
     </main>
   );
-}
+} 
