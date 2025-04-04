@@ -1,6 +1,7 @@
 import { SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import PromptResponseStats from "../../components/PromptResponseStats";
 
 interface Prompt {
   _id: string;
@@ -13,6 +14,14 @@ interface Prompt {
   isReported?: boolean;
 }
 
+interface UserResponseData {
+  _id: string;
+  userId: string;
+  promptId: string;
+  selectedResponse: string;
+  responseDate: Date;
+}
+
 export default function Archived() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,12 +31,13 @@ export default function Archived() {
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
   const [isMod, setIsMod] = useState(false);
+  const [userResponses, setUserResponses] = useState<{ [promptId: string]: string }>({});
+  const [loadingResponses, setLoadingResponses] = useState(false);
 
   useEffect(() => {
     const checkModStatus = async () => {
       if (isSignedIn && user) {
         try {
-          // Fetch user data to check if user is a moderator
           const token = await getToken();
           if (!token) return;
           
@@ -83,16 +93,62 @@ export default function Archived() {
     fetchPrompts();
   }, [getToken, isSignedIn]);
 
+  // Fetch all user responses when logged in
+  useEffect(() => {
+    const fetchUserResponses = async () => {
+      if (!isSignedIn || !user) return;
+      
+      setLoadingResponses(true);
+      try {
+        const token = await getToken();
+        if (!token) {
+          setLoadingResponses(false);
+          return;
+        }
+        
+        const headers = { Authorization: `Bearer ${token}` };
+        const res = await fetch(`/api/user-responses?userId=${user.id}`, { headers });
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.data)) {
+            // Convert array of responses to a map of promptId -> selectedResponse
+            const responsesMap: { [promptId: string]: string } = {};
+            data.data.forEach((response: UserResponseData) => {
+              responsesMap[response.promptId] = response.selectedResponse;
+            });
+            setUserResponses(responsesMap);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching user responses:", err);
+      } finally {
+        setLoadingResponses(false);
+      }
+    };
+
+    fetchUserResponses();
+  }, [isSignedIn, user, getToken]);
+
   useEffect(() => {
     if (!isSignedIn) {
       setPrompts([]);
       setError("");
+      setUserResponses({});
     }
   }, [isSignedIn]);
 
+  // When a prompt is selected, set selected response from user responses if available
+  useEffect(() => {
+    if (selectedPrompt && userResponses[selectedPrompt._id]) {
+      setSelectedResponse(userResponses[selectedPrompt._id]);
+    } else if (selectedPrompt) {
+      setSelectedResponse(null);
+    }
+  }, [selectedPrompt, userResponses]);
+
   const handlePromptClick = (prompt: Prompt) => {
     setSelectedPrompt(prompt);
-    setSelectedResponse(null);
   };
 
   const handleBackClick = () => {
@@ -100,8 +156,57 @@ export default function Archived() {
     setSelectedResponse(null);
   };
 
-  const handleResponseClick = (response: string) => {
+  const handleResponseClick = async (response: string) => {
+    // If user has already responded to this prompt, don't allow changing the answer
+    if (selectedPrompt && userResponses[selectedPrompt._id]) {
+      return;
+    }
+    
+    if (!isSignedIn || !user || !selectedPrompt) return;
+    
     setSelectedResponse(response);
+    
+    try {
+      const token = await getToken();
+      if (!token) return;
+      
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      
+      // Save the user's response
+      const res = await fetch("/api/user-responses", {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          userId: user.id,
+          promptId: selectedPrompt._id,
+          selectedResponse: response
+        })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        // Update the user responses map with the new response
+        setUserResponses(prev => ({
+          ...prev,
+          [selectedPrompt._id]: response
+        }));
+      } else {
+        // Even if there's an error (like user already responded), get the existing response
+        const data = await res.json();
+        if (data.data && data.data.selectedResponse) {
+          setSelectedResponse(data.data.selectedResponse);
+          setUserResponses(prev => ({
+            ...prev,
+            [selectedPrompt._id]: data.data.selectedResponse
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Error saving response:", err);
+    }
   };
 
   const handleUnarchivePrompt = async (promptId: string, e: React.MouseEvent) => {
@@ -147,6 +252,11 @@ export default function Archived() {
     }
   };
 
+  // Helper function to determine if a response is disabled
+  const isResponseDisabled = (promptId: string): boolean => {
+    return !!userResponses[promptId];
+  };
+
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-green-50 px-4 pt-12">
       <header className="fixed top-0 left-0 w-full py-4 bg-green-600 text-white shadow-md flex items-center justify-between px-6 z-50">
@@ -178,20 +288,49 @@ export default function Archived() {
               {selectedPrompt.promptQuestion}
             </h2>
             <div className="grid grid-cols-1 gap-4">
-              {[selectedPrompt.resp1, selectedPrompt.resp2, selectedPrompt.resp3, selectedPrompt.resp4].map((response, index) => (
-                <button
-                  key={index}
-                  className={`p-4 rounded-lg shadow w-full border-2 transition-colors ${selectedResponse === response ? 'border-green-800 bg-green-200' : 'border-transparent bg-gray-200 hover:bg-gray-300'}`}
-                  onClick={() => handleResponseClick(response)}
-                >
-                  {response}
-                </button>
-              ))}
+              {[selectedPrompt.resp1, selectedPrompt.resp2, selectedPrompt.resp3, selectedPrompt.resp4].map((response, index) => {
+                const isDisabled = isResponseDisabled(selectedPrompt._id) && selectedResponse !== response;
+                const isSelected = selectedResponse === response;
+                return (
+                  <button
+                    key={index}
+                    className={`p-4 rounded-lg shadow w-full border-2 transition-colors ${
+                      isSelected 
+                        ? 'border-green-800 bg-green-200' 
+                        : isDisabled
+                        ? "border-transparent bg-gray-300 opacity-50 cursor-not-allowed"
+                        : 'border-transparent bg-gray-200 hover:bg-gray-300'
+                    }`}
+                    onClick={() => handleResponseClick(response)}
+                    disabled={isDisabled}
+                  >
+                    {response}
+                    {isSelected && (
+                      <div className="mt-2 text-sm font-medium text-green-800">
+                        Your selection
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
             {selectedResponse && (
               <div className="mt-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700">
                 Example result: <span className="font-bold">{Math.floor(Math.random() * 100)}%</span>
               </div>
+            )}
+            {isResponseDisabled(selectedPrompt._id) && (
+              <div className="mt-4 p-3 bg-gray-100 text-gray-700 rounded text-center text-sm">
+                You've already responded to this prompt. Your selection cannot be changed.
+              </div>
+            )}
+            
+            {/* Display demographics charts if user has responded */}
+            {selectedResponse && (
+              <PromptResponseStats 
+                promptId={selectedPrompt._id} 
+                selectedResponse={selectedResponse} 
+              />
             )}
           </div>
         ) : (
@@ -211,6 +350,11 @@ export default function Archived() {
                       <h3 className="text-lg font-semibold pr-24">
                         {prompt.promptQuestion}
                       </h3>
+                      {userResponses[prompt._id] && (
+                        <div className="text-sm text-green-600 mt-1">
+                          ✓ You've responded to this prompt
+                        </div>
+                      )}
                       {isMod && (
                         <div className="absolute top-4 right-4 flex space-x-2">
                           <button
