@@ -9,6 +9,7 @@ interface IUser extends Document {
   accountCreated: boolean;
   position: string;
   year: number; 
+  isMod: boolean;
 }
 
 const UserSchema: Schema = new Schema({
@@ -20,7 +21,7 @@ const UserSchema: Schema = new Schema({
   accountCreated: { type: Boolean, default: false },
   position: { type: String, default: "" },
   year: { type: Number, default: 2000}, 
-  
+  isMod: { type: Boolean, default: false },
 });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
