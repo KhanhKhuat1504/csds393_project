@@ -1,11 +1,20 @@
+import fs from 'fs';
+import path from 'path';
 import { GoogleAuth } from 'google-auth-library';
 
 export const isInappropriate = async (text: string): Promise<boolean> => {
   console.log(`[GCP] Moderation check started for text: "${text}"`);
   const THRESHOLD = 0.7;
 
+  // Decode base64 and write to a temp file
+  const keyPath = path.join('/tmp', 'ggcloud-key.json');
+  if (!fs.existsSync(keyPath)) {
+    const keyData = Buffer.from(process.env.GCP_KEY_B64!, 'base64').toString('utf-8');
+    fs.writeFileSync(keyPath, keyData);
+  }
+
   const auth = new GoogleAuth({
-    keyFilename: './ggcloud-key.json',
+    keyFilename: keyPath,
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
 
