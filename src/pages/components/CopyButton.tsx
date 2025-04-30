@@ -2,6 +2,15 @@ import { CopyIcon } from "@/icons";
 import classNames from "classnames";
 import { useEffect, useState } from "react";
 
+/**
+ * CopyButton component that provides copy-to-clipboard functionality.
+ * Shows a temporary tooltip when content is copied.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.text - The text to copy to clipboard when button is clicked
+ * @returns {JSX.Element} Button with copy icon and tooltip
+ */
 export default function CopyButton(props: { text: string }) {
   const [tooltipShown, setTooltipShown] = useState(false);
 

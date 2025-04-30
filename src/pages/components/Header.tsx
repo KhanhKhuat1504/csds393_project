@@ -1,5 +1,13 @@
 import { OrganizationSwitcher, SignedIn, UserButton } from "@clerk/nextjs";
 
+/**
+ * Header component for the CaseAsk application.
+ * Displays the application title and user authentication controls.
+ * Shows the user button when signed in for account management.
+ * 
+ * @component
+ * @returns {JSX.Element} Application header with title and user controls
+ */
 export default function Header() {
   return (
     <header className="w-full bg-blue-600 py-3 flex justify-center items-center">

@@ -4,6 +4,14 @@ import Checkbox from "./ui/checkbox";
 import Button from "./ui/button";
 import { useUser } from "@clerk/nextjs";
 
+/**
+ * Home component that handles user profile creation and completion.
+ * Collects demographic information from users and saves it to the backend.
+ * Redirects to the main application after profile completion.
+ * 
+ * @component
+ * @returns {JSX.Element} Profile completion form or loading states
+ */
 export default function Home() {
   const [isChecked, setIsChecked] = useState(false);
   const [gender, setGender] = useState("");
@@ -15,7 +23,10 @@ export default function Home() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
 
-  // Check if user already has completed their profile
+  /**
+   * Check if user has already completed their profile
+   * Redirects to main page if account is already created
+   */
   useEffect(() => {
     const checkAccountStatus = async () => {
       if (isLoaded && user) {
@@ -48,7 +59,9 @@ export default function Home() {
     checkAccountStatus();
   }, [isLoaded, user, router]);
 
-  // Optional: Pre-fill gender if available from Clerk metadata
+  /**
+   * Pre-fill gender if available from Clerk metadata
+   */
   useEffect(() => {
     if (isLoaded && user && !gender) {
       const userGender = user.publicMetadata.gender as string;
@@ -58,6 +71,10 @@ export default function Home() {
     }
   }, [isLoaded, user, gender]);
 
+  /**
+   * Handle form submission and redirect to main page
+   * Validates form inputs before submitting
+   */
   const handleRedirect = async () => {
     if (!isLoaded || !user) {
       alert("User information not loaded yet. Please try again.");

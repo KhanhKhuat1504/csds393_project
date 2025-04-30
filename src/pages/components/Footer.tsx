@@ -1,6 +1,13 @@
 import { Discord, Docs, Github, Twitter } from "@/icons";
 import Image from "next/image";
 
+/**
+ * Footer component that displays Clerk branding and social/documentation links.
+ * Included at the bottom of pages to provide navigation to external resources.
+ * 
+ * @component
+ * @returns {JSX.Element} Footer with logo, copyright, and external links
+ */
 export default function Footer() {
   return (
     <footer className="flex items-center h-20 gap-1 px-8 font-medium border-t md:px-20">

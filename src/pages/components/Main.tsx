@@ -1,6 +1,14 @@
 import { SignIn } from "@clerk/nextjs";
 import { OrganizationSwitcher, SignedIn, UserButton } from "@clerk/nextjs";
 
+/**
+ * Login component that provides authentication functionality for the CaseAsk application.
+ * Uses Clerk for authentication and user management.
+ * Includes a sign-in form and links for sign-up and forgot password.
+ * 
+ * @component
+ * @returns {JSX.Element} Login form with authentication options
+ */
 export default function Login() {
   return (
     <main className="flex items-center justify-center h-screen bg-gray-100">
