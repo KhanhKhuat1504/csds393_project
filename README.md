@@ -72,30 +72,37 @@ npm run dev
 The application will be running at http://localhost:3000
 
 ## Usage / Examples
-For Non-Technical Users
-Visit the site and sign up with email or social login.
 
-Use the "Ask a Question" form to submit a post.
+Visit the site and sign up with CWRU email login.
+
+Use the prompt to submit a post.
 
 The system will auto-moderate using sentiment analysis.
 
 Posts are displayed to the public feed if safe, or flagged otherwise.
 
-Users can answer, like, or report questions.
+Users can answer, or report questions.
 
 ## Folder Structure
 
-csds393_project/  
-├── components/            # Reusable React components  
-├── pages/                 # Next.js routes including API endpoints   
-│   ├── api/               # Serverless backend functions   
-├── lib/                   # Utility and helper functions   
-├── public/                # Static assets  
-├── styles/                # CSS modules and global styles  
-├── tests/                 # Unit tests   
-├── docs/                  # Architecture diagrams, generated docs  
-├── .env.local             # Environment variables  
-├── README.md              # This file  
+CSDS393_PROJECT/  
+├── .next/                     # Next.js build output (auto-generated)    
+├── node_modules/              # Installed dependencies   
+├── public/                    # Static assets (e.g., images, icons)    
+├── src/                       # Source code    
+│   ├── assets/                # Custom images, fonts, etc.   
+│   ├── components/            # Reusable UI components   
+│   ├── icons/                 # SVG or icon-specific components    
+│   ├── lib/                   # Utility functions (e.g., dbConnect)    
+│   ├── models/                # Mongoose/MongoDB schemas   
+│   ├── pages/                 # Next.js pages and routes   
+│   │   ├── api/               # API route handlers (backend logic)   
+│   │   ├── components/        # Component-specific pages      
+│   │   ├── dashboard/         # Dashboard pages    
+│   │   ├── frontpage/         # Landing/homepage content   
+│   ├── styles/                # Tailwind/global CSS and modules    
+│   ├── tests/                 # Unit tests   
+
 
 ## Tech Stack / Dependencies  
 Frontend: Next.js, React, TypeScript  
