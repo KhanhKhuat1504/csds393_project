@@ -57,8 +57,10 @@ Create a .env.local file and populate it with:
 ```bash
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
 CLERK_SECRET_KEY=your_clerk_secret
+SIGNING_SECRET=your_webhook_secret
 MONGODB_URI=your_mongodb_uri
-GOOGLE_CLOUD_API_KEY=your_google_api_key
+GOOGLE_API_KEY=your_google_api_key
+GCP_KEY_B64=your_google_api_key_in_base64
 ```
 
 4. Run the development server:
