@@ -121,18 +121,6 @@ Tahir: Backend, and Database management
 
 ## Development Retrospective
 What Could Be Improved
-More balanced workload sharing would have improved the team dynamic.
-
-Earlier planning and implementation of orchestration tools (e.g., Airflow) could have automated the data flow pipeline more effectively.
-
-Incorporating UI testing and end-to-end tests could have added more stability.
-
-Lessons Learned
-Effective team collaboration is just as important as technical skill.
-
-Integrating external services (auth, APIs) can introduce unexpected complexity.
-
-Having a strong data pipeline from the start saves massive time later.
 
 ## Testing
 This project uses Jest and React Testing Library for unit testing frontend components and backend API routes.
