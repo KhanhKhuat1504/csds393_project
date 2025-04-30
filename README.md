@@ -4,6 +4,7 @@ CaseAsk is a web application designed for Case Western Reserve University studen
 
 
 ## Introduction
+<img width="783" alt="Screenshot 2025-04-29 222822" src="https://github.com/user-attachments/assets/a9258479-701e-465f-b5d9-903b5b043c69" />
 
 Clerk is a developer-first authentication and user management solution. It provides pre-built React components and hooks for sign-in, sign-up, user profile, and organization management. Clerk is designed to be easy to use and customize, and can be dropped into any React or Next.js application.
 
