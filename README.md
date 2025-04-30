@@ -111,7 +111,7 @@ Backend: Node.js, REST API (via Next.js API Routes)
 
 Database: MongoDB Atlas 
 
-Authentication: Clerk.dev 
+Authentication: Clerk   
 
 Moderation: Google Cloud Natural Language API 
 
@@ -123,9 +123,9 @@ Other Tools: ESLint, Prettier, GitHub Actions (CI), JSDoc
 
 ## Contribution
 
-Khanh: Worked on Clerk Auth, Backend, AI feature and Deployment   
-Evan: Worked on Clerk Auth, Frontend, Style, and Moderation   
-Ricky: Worked on frontend and debug the frontend and backend api  
+Khanh: Clerk Auth, Backend, AI feature and Deployment   
+Evan: Clerk Auth, Frontend, Style, and Moderation   
+Ricky: Frontend and debug the frontend and Backend API     
 Tahir: Backend, and Database management   
 
 ## Development Retrospective
