@@ -3,60 +3,33 @@
 CaseAsk is a web application designed for Case Western Reserve University students and faculty. It enables users to anonymously create and respond to prompts, share sentiments, and track community feedback through aggregated analytics, all within a secure and moderated environment.
 
 
-## Introduction
+## Architecture
 <img width="783" alt="Screenshot 2025-04-29 222822" src="https://github.com/user-attachments/assets/a9258479-701e-465f-b5d9-903b5b043c69" />
 
-Clerk is a developer-first authentication and user management solution. It provides pre-built React components and hooks for sign-in, sign-up, user profile, and organization management. Clerk is designed to be easy to use and customize, and can be dropped into any React or Next.js application.
 
-This template allows you to get started with Clerk and Next.js (Pages Router) in a matter of minutes, and demonstrates features of Clerk such as:
 
-- Fully functional auth flow with sign-in, sign-up, and a protected page
-- Customized Clerk components with Tailwind CSS
-- Hooks for accessing user data and authentication state
-- Organizations for multi-tenant applications
+## installation
 
-## Demo
 
-A hosted demo of this example is available at https://clerk-nextjs-demo-pages-router.clerkpreview.com/
 
-## Deploy
+## Usage 
 
-Easily deploy the template to Vercel with the button below. You will need to set the required environment variables in the Vercel dashboard.
+## Dependencies
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fclerkinc%2Fclerk-nextjs-demo-pages-router&env=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY&envDescription=Clerk%20API%20keys&envLink=https%3A%2F%2Fclerk.com%2Fdocs%2Fquickstarts%2Fnextjs&redirect-url=https%3A%2F%2Fclerk.com%2Fdocs%2Fquickstarts%2Fnextjs)
+## Folder structure overview
 
-## Running the template
 
-```bash
-git clone https://github.com/clerkinc/clerk-nextjs-demo-pages-router
-```
 
-To run the example locally, you need to:
+## Contribution
 
-1. Sign up for a Clerk account at [https://clerk.com](https://dashboard.clerk.com/sign-up?utm_source=DevRel&utm_medium=docs&utm_campaign=templates&utm_content=10-24-2023&utm_term=clerk-nextjs-demo-pages-router).
-2. Go to the [Clerk dashboard](https://dashboard.clerk.com?utm_source=DevRel&utm_medium=docs&utm_campaign=templates&utm_content=10-24-2023&utm_term=clerk-nextjs-demo-pages-router) and create an application.
-3. Set the required Clerk environment variables as shown in [the example `env` file](./.env.template).
-4. `npm install` the required dependencies.
-5. `npm run dev` to launch the development server.
 
-## Learn more
+## Development retrospective
 
-To learn more about Clerk and Next.js, check out the following resources:
 
-- [Quickstart: Get started with Next.js and Clerk](https://clerk.com/docs/quickstarts/nextjs?utm_source=DevRel&utm_medium=docs&utm_campaign=templates&utm_content=10-24-2023&utm_term=clerk-nextjs-demo-pages-router)
-- [Clerk Documentation](https://clerk.com/docs?utm_source=DevRel&utm_medium=docs&utm_campaign=templates&utm_content=10-24-2023&utm_term=clerk-nextjs-demo-pages-router)
-- [Next.js Documentation](https://nextjs.org/docs)
 
-## Found an issue?
+## License
 
-If you have found an issue with our documentation, please create an [issue](https://github.com/clerkinc/clerk-nextjs-demo-pages-router/issues).
 
-If it's a quick fix, such as a misspelled word or a broken link, feel free to skip creating an issue.  
-Go ahead and create a [pull request](https://github.com/clerkinc/clerk-nextjs-demo-pages-router/pulls) with the solution. :rocket:
-
-## Want to leave feedback?
-
-Feel free to create an [issue](https://github.com/clerkinc/clerk-nextjs-demo-pages-router/issues) with the **feedback** label. Our team will take a look at it and get back to you as soon as we can!
 
 ## Connect with us
 
