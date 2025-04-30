@@ -11,7 +11,7 @@ The testing framework uses Jest with the following configuration:
 - **Features:**
   - Increased Jest timeout for MongoDB operations (30s)
   - Mock environment variables
-  - Global mocks for common services, like Google Auth and moderation
+  - Global mocks for common services
   - Console output control during tests
 
 ## Test Files
@@ -53,7 +53,6 @@ Tests the Next.js API endpoints using node-mocks-http to simulate requests and r
 - **Prompt API:**
   - Creating new prompts
   - Updating prompt flags
-  - Deleting prompts
   - Retrieving prompts with filtering
 
 - **User Response API:**
@@ -63,25 +62,32 @@ Tests the Next.js API endpoints using node-mocks-http to simulate requests and r
 
 ### Moderation Tests (moderation.test.ts)
 
-Tests the content moderation service.
+Tests the content moderation service that uses Google Cloud Platform's content moderation API.
 
 **Coverage:**
-- Detection of inappropriate content
-- Confidence threshold testing
+- Detection of inappropriate content based on confidence thresholds
+- Handling of different content categorization levels
 - Error handling in the moderation service
+- Proper authentication with GCP APIs
+
+**Mocking Strategy:**
+- Environment variables (GCP_KEY_B64) mocked with dummy values
+- Buffer.from operations mocked to avoid actual key parsing
+- GoogleAuth client operations mocked to simulate API responses
+- Different content moderation responses simulated for testing scenarios
 
 ## Running Tests
 
 Tests can be run using the following command:
 
 ```bash
-npm run test
+npm test
 ```
 
 To run a specific test file:
 
 ```bash
-npm run test -- src/tests/api.test.ts
+npm test -- src/tests/api.test.ts
 ```
 
 ## Mock Strategy
@@ -89,9 +95,13 @@ npm run test -- src/tests/api.test.ts
 The test suite uses the following mock strategy:
 
 1. **MongoDB**: Uses mongodb-memory-server for in-memory database testing
-2. **Google Auth**: Mocked to simulate content moderation responses
-3. **Moderation Service**: Has configurable mocks to test different content conditions
-4. **Database Connection**: Mocked to prevent connection conflicts
+2. **Environment Variables**: Directly mocked in test files (e.g., `process.env.GCP_KEY_B64 = 'mock-base64-key'`)
+3. **External Services**: 
+   - Google Auth mocked to simulate content moderation responses
+   - Buffer methods mocked when processing sensitive data like API keys
+   - Database connection mocked to prevent real connection attempts
+4. **API Requests/Responses**: Uses node-mocks-http to simulate Next.js API context
+5. **Authentication**: Simulated with mock authorization headers
 
 ## Best Practices
 
@@ -103,6 +113,7 @@ When adding new tests:
 4. Keep tests independent (no dependencies between test cases)
 5. For API tests, use the typedMocks helper function for proper NextApiRequest/Response types
 6. Mock external services and APIs to isolate test cases
+7. When mocking environment variables or system objects (like Buffer), restore originals in afterAll hooks
 
 ## Code Coverage
 
