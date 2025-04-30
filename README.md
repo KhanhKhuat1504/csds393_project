@@ -85,23 +85,26 @@ Users can answer, or report questions.
 
 ## Folder Structure
 
-CSDS393_PROJECT/  
-├── .next/                     # Next.js build output (auto-generated)    
-├── node_modules/              # Installed dependencies   
-├── public/                    # Static assets (e.g., images, icons)    
-├── src/                       # Source code    
-│   ├── assets/                # Custom images, fonts, etc.   
-│   ├── components/            # Reusable UI components   
-│   ├── icons/                 # SVG or icon-specific components    
-│   ├── lib/                   # Utility functions (e.g., dbConnect)    
-│   ├── models/                # Mongoose/MongoDB schemas   
-│   ├── pages/                 # Next.js pages and routes   
-│   │   ├── api/               # API route handlers (backend logic)   
-│   │   ├── components/        # Component-specific pages      
-│   │   ├── dashboard/         # Dashboard pages    
-│   │   ├── frontpage/         # Landing/homepage content   
-│   ├── styles/                # Tailwind/global CSS and modules    
-│   ├── tests/                 # Unit tests   
+```
+CSDS393_PROJECT/
+├── .next/                   # Next.js build output (auto-generated)
+├── node_modules/            # Installed dependencies
+├── public/                  # Static assets (e.g., images, icons)
+├── src/                     # Source code
+│   ├── assets/              # Custom images, fonts, etc.
+│   ├── components/          # Reusable UI components
+│   ├── icons/               # SVG or icon-specific components
+│   ├── lib/                 # Utility functions (e.g., dbConnect)
+│   ├── models/              # Mongoose/MongoDB schemas
+│   ├── pages/               # Next.js pages and routes
+│   │   ├── api/             # API route handlers (backend logic)
+│   │   ├── components/      # Component-specific pages
+│   │   ├── dashboard/       # Dashboard pages
+│   │   ├── frontpage/       # Landing/homepage content
+│   ├── styles/              # Tailwind/global CSS and modules
+│   ├── tests/               # Unit tests
+```
+  
 
 
 ## Tech Stack / Dependencies  
