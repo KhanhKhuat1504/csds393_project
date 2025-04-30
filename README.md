@@ -1,38 +1,185 @@
 # CaseAsk
 
-CaseAsk is a web application designed for Case Western Reserve University students and faculty. It enables users to anonymously create and respond to prompts, share sentiments, and track community feedback through aggregated analytics, all within a secure and moderated environment.
+CaseAsk is a campus-wide, AI-moderated Q&A web application designed to help students ask and answer questions in a respectful, inclusive, and efficient learning environment. It features automatic content moderation using sentiment and language analysis, real-time updates, and user authentication. 
 
+---
 
-## Architecture
-<img width="783" alt="Screenshot 2025-04-29 222822" src="https://github.com/user-attachments/assets/a9258479-701e-465f-b5d9-903b5b043c69" />
+## Live Demo
 
+[https://caseask.vercel.app](https://caseask.vercel.app)
 
+---
 
-## installation
+## Architecture Overview
 
+### System Architecture Diagram
 
+![Architecture Diagram](./public/architecture.png)
 
-## Usage 
+**Main Components:**
+- **Frontend:** Next.js with TypeScript
+- **Backend:** Node.js API Routes (serverless)
+- **Database:** MongoDB Atlas
+- **Authentication:** Clerk
+- **Moderation:** Google Cloud Natural Language API
+- **Deployment:** Vercel
 
-## Dependencies
+---
 
-## Folder structure overview
+## Getting Started / Installation
 
+### Prerequisites
 
+- Node.js >= 18.x
+- npm or yarn
+- MongoDB URI (MongoDB Atlas or local instance)
+- Clerk API credentials (Publishable and Secret Key)
+- Google Cloud Natural Language API Key
+
+### Installation Steps
+
+1. Clone the repository:
+
+   
+```bash
+   git clone https://github.com/KhanhKhuat1504/csds393_project.git
+   cd csds393_project
+```
+
+2. Install dependencies:
+```bash
+  npm install
+```
+3. Set up environment variables:
+
+Create a .env.local file and populate it with:
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+CLERK_SECRET_KEY=your_clerk_secret
+MONGODB_URI=your_mongodb_uri
+GOOGLE_CLOUD_API_KEY=your_google_api_key
+```
+
+4. Run the development server:
+
+```bash
+npm run dev
+```
+
+The application will be running at http://localhost:3000
+
+## Usage / Examples
+For Non-Technical Users
+Visit the site and sign up with email or social login.
+
+Use the "Ask a Question" form to submit a post.
+
+The system will auto-moderate using sentiment analysis.
+
+Posts are displayed to the public feed if safe, or flagged otherwise.
+
+Users can answer, like, or report questions.
+
+## Folder Structure
+
+csds393_project/  
+├── components/            # Reusable React components  
+├── pages/                 # Next.js routes including API endpoints   
+│   ├── api/               # Serverless backend functions   
+├── lib/                   # Utility and helper functions   
+├── public/                # Static assets  
+├── styles/                # CSS modules and global styles  
+├── tests/                 # Unit tests   
+├── docs/                  # Architecture diagrams, generated docs  
+├── .env.local             # Environment variables  
+├── README.md              # This file  
+
+## Tech Stack / Dependencies  
+Frontend: Next.js, React, TypeScript  
+
+Backend: Node.js, REST API (via Next.js API Routes) 
+
+Database: MongoDB Atlas 
+
+Authentication: Clerk.dev 
+
+Moderation: Google Cloud Natural Language API 
+
+Testing: Jest, React Testing Library  
+
+Deployment: Vercel  
+
+Other Tools: ESLint, Prettier, GitHub Actions (CI), JSDoc 
 
 ## Contribution
 
+Khanh: Worked on Clerk Auth, Backend, AI feature and Deployment   
+Evan: Worked on Clerk Auth, Frontend, Style, and Moderation   
+Ricky: Worked on frontend and debug the frontend and backend api  
+Tahir: Backend, and Database management   
 
-## Development retrospective
+## Development Retrospective
+What Could Be Improved
+More balanced workload sharing would have improved the team dynamic.
 
+Earlier planning and implementation of orchestration tools (e.g., Airflow) could have automated the data flow pipeline more effectively.
+
+Incorporating UI testing and end-to-end tests could have added more stability.
+
+Lessons Learned
+Effective team collaboration is just as important as technical skill.
+
+Integrating external services (auth, APIs) can introduce unexpected complexity.
+
+Having a strong data pipeline from the start saves massive time later.
+
+## Testing
+This project uses Jest and React Testing Library for unit testing frontend components and backend API routes.
+
+Run tests:
+
+```bash
+npm run test
+```
+
+## testing.md Summary
+Unit tests are located in the /tests directory.
+
+Components tested:
+
+User Authentication
+
+Question Submission
+
+Answer Submission
+
+AI Moderation logic
+
+Flagging/Inappropriate Post handling
+
+Test Coverage
+We cover ~85% of major flows: posting, answering, flagging, and moderation.
+
+Auth-related flows are tested using Clerk’s mocked responses.
+
+## Source Code Documentation
+All classes, functions, and modules include Google-style docstrings.
+
+Documentation generated using JSDoc.
+
+Generate docs:
+```bash
+npx jsdoc -c jsdoc.config.json
+```
+
+Generated HTML docs are located in:
+
+/docs/html/index.html
 
 
 ## License
+This project is open-source and licensed under the MIT License.
 
+## Contact
 
-
-## Connect with us
-
-You can discuss ideas, ask questions, and meet others from the community in our [Discord](https://discord.com/invite/b5rXHjAg7A).
-
-If you prefer, you can also find support through our [Twitter](https://twitter.com/ClerkDev), or you can [email](mailto:support@clerk.dev) us!
