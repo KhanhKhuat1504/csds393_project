@@ -1,8 +1,30 @@
+/**
+ * Another View component
+ * Provides an additional UI variation for the CaseAsk application
+ * Includes moderator functionality to clear reported prompts and delete prompts
+ * 
+ * @module pages/frontpage/another-view
+ */
+
 import { SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import PromptResponseStats from "../../components/PromptResponseStats";
 
+/**
+ * Represents a prompt/question with multiple response options
+ * 
+ * @interface Prompt
+ * @property {string} _id - Unique identifier for the prompt
+ * @property {string} promptQuestion - The main question text
+ * @property {string} resp1 - First response option
+ * @property {string} resp2 - Second response option
+ * @property {string} resp3 - Third response option
+ * @property {string} resp4 - Fourth response option
+ * @property {boolean} [isArchived] - Whether the prompt is archived
+ * @property {boolean} [isReported] - Whether the prompt has been reported
+ * @property {boolean} [isAutoFlagged] - Whether the prompt was automatically flagged by moderation
+ */
 interface Prompt {
     _id: string;
     promptQuestion: string;
@@ -15,6 +37,16 @@ interface Prompt {
     isAutoFlagged?: boolean;
 }
 
+/**
+ * Represents a user's response to a prompt
+ * 
+ * @interface UserResponseData
+ * @property {string} _id - Unique identifier for the response
+ * @property {string} userId - ID of the user who responded
+ * @property {string} promptId - ID of the prompt being responded to
+ * @property {string} selectedResponse - The selected response option text
+ * @property {Date} responseDate - When the response was submitted
+ */
 interface UserResponseData {
     _id: string;
     userId: string;
@@ -23,6 +55,13 @@ interface UserResponseData {
     responseDate: Date;
 }
 
+/**
+ * AnotherView component
+ * Provides specialized UI for viewing and managing prompts
+ * Includes moderation functions for clearing reported prompts and deleting prompts
+ * 
+ * @returns {JSX.Element} The specialized view component
+ */
 export default function AnotherView() {
     const [prompts, setPrompts] = useState<Prompt[]>([]);
     const [loading, setLoading] = useState(true);

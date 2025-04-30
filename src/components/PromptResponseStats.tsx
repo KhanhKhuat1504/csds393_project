@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import DemographicChart from './DemographicChart';
 
+/**
+ * Props interface for the PromptResponseStats component
+ * 
+ * @interface PromptStatsProps
+ * @property {string} promptId - Unique identifier for the prompt
+ * @property {string | null} selectedResponse - Currently selected response option
+ * @property {string | null} [hoveredResponse] - Currently hovered response option (optional)
+ * @property {string | null} [previewResponse] - Response being previewed, takes precedence over other selections (optional)
+ * @property {Function} [onStatsLoaded] - Callback when statistics are loaded successfully (optional)
+ */
 interface PromptStatsProps {
   promptId: string;
   selectedResponse: string | null;
@@ -9,23 +19,55 @@ interface PromptStatsProps {
   onStatsLoaded?: (stats: PromptStats) => void;
 }
 
+/**
+ * Interface for demographic data breakdown by category
+ * 
+ * @interface DemographicData
+ * @property {Object} gender - Counts of responses by gender category
+ * @property {Object} position - Counts of responses by academic position
+ * @property {Object} year - Counts of responses by birth year/age
+ */
 interface DemographicData {
   gender: { [key: string]: number };
   position: { [key: string]: number };
   year: { [key: string]: number };
 }
 
+/**
+ * Interface for statistics for a specific answer option
+ * 
+ * @interface AnswerStats
+ * @property {number} count - Total number of times this answer was selected
+ * @property {DemographicData} demographics - Demographic breakdown of respondents who chose this answer
+ */
 interface AnswerStats {
   count: number;
   demographics: DemographicData;
 }
 
+/**
+ * Interface for overall prompt statistics
+ * 
+ * @interface PromptStats
+ * @property {number} responseCount - Total number of responses to the prompt
+ * @property {boolean} hasEnoughData - Whether there's sufficient data for meaningful analysis
+ * @property {Object} answerStats - Statistics for each possible answer, keyed by answer text
+ */
 interface PromptStats {
   responseCount: number;
   hasEnoughData: boolean;
   answerStats: { [answer: string]: AnswerStats };
 }
 
+/**
+ * PromptResponseStats component displays demographic statistics for prompt responses.
+ * Shows charts breaking down response selection by gender, academic position, and age.
+ * Handles loading states, error conditions, and different data display modes.
+ * 
+ * @component
+ * @param {PromptStatsProps} props - Component props
+ * @returns {JSX.Element} Statistical visualization or appropriate status message
+ */
 const PromptResponseStats: React.FC<PromptStatsProps> = ({ 
   promptId, 
   selectedResponse,
@@ -40,7 +82,12 @@ const PromptResponseStats: React.FC<PromptStatsProps> = ({
   // Use the preview response if available, then hovered response, then selected response
   const displayedResponse = previewResponse || hoveredResponse || selectedResponse;
 
-  // Calculate percentage of a given response
+  /**
+   * Calculates percentage of total responses for a given answer option
+   * 
+   * @param {string | null} response - The response option to calculate percentage for
+   * @returns {number} Percentage (0-100) of total responses
+   */
   const calculatePercentage = (response: string | null): number => {
     if (!stats || !response || !stats.answerStats[response]) {
       return 0;
@@ -54,6 +101,10 @@ const PromptResponseStats: React.FC<PromptStatsProps> = ({
     return Math.round((responseCount / totalResponses) * 100);
   };
 
+  /**
+   * Fetches statistics data from the API when promptId changes
+   * Updates component state based on API response
+   */
   useEffect(() => {
     const fetchStats = async () => {
       if (!promptId) return;
@@ -89,6 +140,7 @@ const PromptResponseStats: React.FC<PromptStatsProps> = ({
     // Remove onStatsLoaded from dependency array to prevent infinite loops
   }, [promptId]);
 
+  // Loading state display
   if (loading) {
     return (
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">
@@ -97,6 +149,7 @@ const PromptResponseStats: React.FC<PromptStatsProps> = ({
     );
   }
 
+  // Error state display
   if (error) {
     return (
       <div className="mt-6 p-4 bg-red-50 rounded-lg">
@@ -105,6 +158,7 @@ const PromptResponseStats: React.FC<PromptStatsProps> = ({
     );
   }
 
+  // No data state display
   if (!stats || stats.responseCount === 0) {
     return (
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">
@@ -113,7 +167,7 @@ const PromptResponseStats: React.FC<PromptStatsProps> = ({
     );
   }
 
-  // If there's no response to display, show a general message
+  // No response selected state
   if (!displayedResponse) {
     return (
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">

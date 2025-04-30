@@ -1,9 +1,30 @@
+/**
+ * API endpoint for prompt/question management
+ * Provides CRUD operations for prompts with content moderation
+ * 
+ * @module api/prompt
+ */
+
 // pages/api/prompt.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '../../lib/dbConnect';
 import Prompt from '../../models/Prompt';
 import { isInappropriate } from '@/lib/moderation';
 
+/**
+ * Next.js API route handler for prompt operations
+ * Supports:
+ * - GET: Fetch all prompts or a specific prompt by ID
+ * - POST: Create a new prompt with content moderation
+ * - PUT: Update an existing prompt
+ * - DELETE: Remove a prompt
+ * 
+ * @async
+ * @function handler
+ * @param {NextApiRequest} req - The Next.js API request object
+ * @param {NextApiResponse} res - The Next.js API response object
+ * @returns {Promise<void>} Response with status and JSON data
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -13,6 +34,10 @@ export default async function handler(
 
   await dbConnect();
 
+  /**
+   * POST handler - Create a new prompt with content moderation
+   * Checks all text fields for inappropriate content before saving
+   */
   if (req.method === 'POST') {
     try {
       const { promptQuestion, resp1, resp2, resp3, resp4 } = req.body;
@@ -43,7 +68,13 @@ export default async function handler(
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
-  } else if (req.method === 'PUT') {
+  } 
+  
+  /**
+   * PUT handler - Update an existing prompt
+   * Updates prompt fields by ID
+   */
+  else if (req.method === 'PUT') {
     try {
       const { id, ...updateData } = req.body;
       const updatedPrompt = await Prompt.findByIdAndUpdate(id, updateData, { new: true });
@@ -54,7 +85,13 @@ export default async function handler(
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
-  } else if (req.method === 'GET') {
+  } 
+  
+  /**
+   * GET handler - Retrieve prompts
+   * Fetches a specific prompt by ID or all prompts if no ID provided
+   */
+  else if (req.method === 'GET') {
     try {
       // Check if an ID is provided for fetching a specific prompt
       const { id } = req.query;
@@ -73,7 +110,13 @@ export default async function handler(
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
     }
-  } else if (req.method === 'DELETE') {
+  } 
+  
+  /**
+   * DELETE handler - Remove a prompt
+   * Deletes a prompt by ID
+   */
+  else if (req.method === 'DELETE') {
     try {
       const { id } = req.query;
       

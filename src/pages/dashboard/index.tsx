@@ -1,3 +1,10 @@
+/**
+ * Dashboard page component
+ * Main dashboard layout that displays user information and related widgets
+ * 
+ * @module pages/dashboard
+ */
+
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Header from "../components/Header";
@@ -6,6 +13,13 @@ import UserDetails from "./UserDetails";
 import SessionDetails from "./SessionDetails";
 import OrgDetails from "./OrgDetails";
 
+/**
+ * Dashboard page component
+ * Displays user information, session details, and organization data
+ * Acts as the main landing page after authentication
+ * 
+ * @returns {JSX.Element} The dashboard page with user information widgets
+ */
 export default function DashboardPage() {
   const { user } = useUser();
 

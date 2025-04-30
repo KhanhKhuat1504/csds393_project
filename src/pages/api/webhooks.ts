@@ -1,3 +1,10 @@
+/**
+ * API endpoint that handles Clerk webhook events
+ * Processes user creation events to synchronize Clerk user data with our MongoDB database
+ * 
+ * @module api/webhooks
+ */
+
 import { Webhook } from 'svix';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { WebhookEvent } from '@clerk/nextjs/server';
@@ -6,6 +13,17 @@ import User from '@/models/User';
 
 const SIGNING_SECRET = process.env.SIGNING_SECRET;
 
+/**
+ * Next.js API route handler for Clerk webhooks
+ * Verifies webhook signatures and processes user creation events
+ * 
+ * @async
+ * @function handler
+ * @param {NextApiRequest} req - The Next.js API request object
+ * @param {NextApiResponse} res - The Next.js API response object
+ * @returns {Promise<void>} Response with status and JSON data
+ * @throws {Error} When SIGNING_SECRET is not configured or webhook verification fails
+ */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   if (!SIGNING_SECRET) {
@@ -76,6 +94,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   return res.status(200).json({ message: 'Webhook received' });
 }
 
+/**
+ * Runtime configuration for the API route
+ * Ensures the route runs in a Node.js environment for compatibility with Svix and Mongoose
+ */
 export const config = {
   runtime: "nodejs", // Ensure this API route runs in a Node.js environment to avoid Vercel deployment errors
 };

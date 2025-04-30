@@ -5,6 +5,15 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, ChartData } from 'chart.
 // Register the required chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+/**
+ * Props interface for the DemographicChart component
+ * 
+ * @interface DemographicChartProps
+ * @property {Object} data - Key-value pairs where keys are demographic categories and values are counts
+ * @property {string} title - Title displayed above the chart
+ * @property {'gender' | 'position' | 'year'} type - Type of demographic data being displayed
+ * @property {boolean} isEnoughData - Whether there is sufficient data to render the chart
+ */
 interface DemographicChartProps {
   data: { [key: string]: number };
   title: string;
@@ -12,7 +21,13 @@ interface DemographicChartProps {
   isEnoughData: boolean;
 }
 
-// Color schemes by demographic type
+/**
+ * Color schemes for different demographic types
+ * Each type has matching background and border colors for chart segments
+ * 
+ * @constant
+ * @type {Object}
+ */
 const colorSchemes = {
   gender: {
     backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)'],
@@ -56,6 +71,15 @@ const colorSchemes = {
   }
 };
 
+/**
+ * DemographicChart component for displaying demographic data in a pie chart.
+ * Renders different visualizations for gender, position (academic level), and age distributions.
+ * Shows a placeholder message when not enough data is available.
+ * 
+ * @component
+ * @param {DemographicChartProps} props - Component props
+ * @returns {JSX.Element} Pie chart visualization or fallback message when data is insufficient
+ */
 const DemographicChart: React.FC<DemographicChartProps> = ({ data, title, type, isEnoughData }) => {
   if (!isEnoughData) {
     return (
@@ -79,7 +103,10 @@ const DemographicChart: React.FC<DemographicChartProps> = ({ data, title, type, 
     ],
   };
 
-  // Chart options
+  /**
+   * Chart configuration options
+   * Customizes appearance, legend position, tooltip formatting, etc.
+   */
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -95,6 +122,13 @@ const DemographicChart: React.FC<DemographicChartProps> = ({ data, title, type, 
       },
       tooltip: {
         callbacks: {
+          /**
+           * Custom tooltip label formatter
+           * Displays percentage and count for each demographic category
+           * 
+           * @param {Object} context - Chart context containing label and value data
+           * @returns {string} Formatted tooltip label with percentage and count
+           */
           label: function(context: any) {
             const label = context.label || '';
             const value = context.raw || 0;

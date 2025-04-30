@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Database model and operations tests.
+ * This file contains tests for the Mongoose models and database operations using
+ * an in-memory MongoDB server. It tests CRUD operations on each model to ensure
+ * they function correctly and maintain data integrity.
+ *
+ * @module tests/db
+ */
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import User from '../models/User';
@@ -5,13 +13,22 @@ import Prompt, { IPrompt } from '../models/Prompt';
 import UserResponse from '../models/UserResponse';
 import { jest, describe, test, expect, beforeAll, afterEach, afterAll } from '@jest/globals';
 
-// Mock the dbConnect module to prevent connection conflicts
+/**
+ * Mock the database connection module to prevent connection conflicts.
+ * This ensures that tests use the in-memory database rather than connecting
+ * to the actual database specified in configuration.
+ */
 jest.mock('../lib/dbConnect', () => ({
   __esModule: true,
   default: jest.fn().mockImplementation(() => Promise.resolve(mongoose))
 }));
 
-// Mock the moderation service
+/**
+ * Mock the content moderation service for testing.
+ * This mock implementation flags content containing the word "inappropriate"
+ * to enable testing of content moderation functionality without calling
+ * external APIs.
+ */
 jest.mock('../lib/moderation', () => ({
   // Use any to bypass the type check for the mock implementation
   isInappropriate: jest.fn().mockImplementation((text: any) => {
@@ -20,17 +37,27 @@ jest.mock('../lib/moderation', () => ({
   })
 }));
 
+/**
+ * Test suite for all database operations.
+ * Tests CRUD operations on all models to ensure data integrity.
+ */
 describe('Database Operations', () => {
   let mongoServer: MongoMemoryServer;
 
-  // Set up the in-memory database before tests
+  /**
+   * Set up the in-memory database before running any tests.
+   * Creates a MongoDB Memory Server instance and connects Mongoose to it.
+   */
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
   });
 
-  // Clear all collections after each test
+  /**
+   * Clean up after each test to ensure test isolation.
+   * Deletes all documents from all collections and resets mocks.
+   */
   afterEach(async () => {
     await User.deleteMany({});
     await Prompt.deleteMany({});
@@ -40,14 +67,24 @@ describe('Database Operations', () => {
     jest.clearAllMocks();
   });
 
-  // Close and stop the server after all tests
+  /**
+   * Clean up after all tests are complete.
+   * Disconnects from the database and stops the memory server.
+   */
   afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
   });
 
-  // User Model Tests
+  /**
+   * Tests for the User model operations.
+   * Verifies user creation, updates, queries, and role management.
+   */
   describe('User Model', () => {
+    /**
+     * Test user creation with all fields.
+     * Verifies that a new user can be created with all required and optional fields.
+     */
     test('should create a new user', async () => {
       const userData = {
         clerkId: 'test-clerk-id',
@@ -128,7 +165,10 @@ describe('Database Operations', () => {
     });
   });
 
-  // Prompt Model Tests
+  /**
+   * Tests for the Prompt model operations.
+   * Verifies prompt creation, updates, flagging, and archival.
+   */
   describe('Prompt Model', () => {
     test('should create a new prompt', async () => {
       const promptData = {
@@ -225,7 +265,10 @@ describe('Database Operations', () => {
     });
   });
 
-  // UserResponse Model Tests
+  /**
+   * Tests for the UserResponse model operations.
+   * Verifies response creation, retrieval, and analysis.
+   */
   describe('UserResponse Model', () => {
     test('should create a user response', async () => {
       // First create a prompt

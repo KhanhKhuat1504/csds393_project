@@ -1,3 +1,11 @@
+/**
+ * Create Prompt Page
+ * Allows users to create new prompts with a question and four response options
+ * Implements content moderation checks before saving to database
+ * 
+ * @module pages/frontpage/create-prompt
+ */
+
 import { useState } from "react";
 import { useRouter } from "next/router";
 import {
@@ -8,6 +16,14 @@ import {
     useUser,
 } from "@clerk/nextjs";
 
+/**
+ * CreatePrompt component
+ * Provides a form for creating new prompts with validation
+ * Implements content moderation via the backend API
+ * Redirects to the main frontpage after successful submission
+ * 
+ * @returns {JSX.Element} The create prompt form page
+ */
 export default function CreatePrompt() {
     const router = useRouter();
     const { getToken } = useAuth();
@@ -16,14 +32,23 @@ export default function CreatePrompt() {
     const [responses, setResponses] = useState(["", "", "", ""]);
     const [loading, setLoading] = useState(false);
 
-    // Handle response input changes
+    /**
+     * Updates a response option at the specified index
+     * 
+     * @param {number} index - The index of the response to update (0-3)
+     * @param {string} value - The new value for the response
+     */
     const handleResponseChange = (index: number, value: string) => {
         const newResponses = [...responses];
         newResponses[index] = value;
         setResponses(newResponses);
     };
 
-    // Submit prompt to backend
+    /**
+     * Submits the prompt to the backend API
+     * Validates inputs, sends data to server, and handles response
+     * Redirects to main page on success or shows appropriate error
+     */
     const handleSubmit = async () => {
         if (!promptQuestion.trim() || responses.some((resp) => !resp.trim())) {
             alert("All fields are required.");

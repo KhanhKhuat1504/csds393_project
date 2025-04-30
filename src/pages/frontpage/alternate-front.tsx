@@ -1,9 +1,28 @@
+/**
+ * Alternate Front component
+ * Provides an alternative UI layout for the CaseAsk application
+ * Displays prompts and allows users to select responses with a different design
+ * 
+ * @module pages/frontpage/alternate-front
+ */
+
 // components/AlternateFront.tsx
 import { SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import PromptResponseStats from "../../components/PromptResponseStats";
 
+/**
+ * Represents a prompt/question with multiple response options
+ * 
+ * @interface Prompt
+ * @property {string} _id - Unique identifier for the prompt
+ * @property {string} promptQuestion - The main question text
+ * @property {string} resp1 - First response option
+ * @property {string} resp2 - Second response option
+ * @property {string} resp3 - Third response option
+ * @property {string} resp4 - Fourth response option
+ */
 interface Prompt {
   _id: string;
   promptQuestion: string;
@@ -13,6 +32,13 @@ interface Prompt {
   resp4: string;
 }
 
+/**
+ * AlternateFront component
+ * Provides an alternative UI layout for viewing and responding to prompts
+ * Shows demographic statistics for responses when a user has answered
+ * 
+ * @returns {JSX.Element} The alternate front page component
+ */
 export default function AlternateFront() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);

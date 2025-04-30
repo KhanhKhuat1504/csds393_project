@@ -1,14 +1,41 @@
+/**
+ * API endpoint for retrieving response statistics for prompts
+ * Provides demographic breakdown of responses by gender, position, and age
+ * 
+ * @module api/prompt-stats
+ */
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '../../lib/dbConnect';
 import UserResponse from '../../models/UserResponse';
 import User from '../../models/User';
 
+/**
+ * Type definition for demographic data organization
+ * Groups user counts by various demographic categories
+ * 
+ * @typedef {Object} DemographicData
+ * @property {Object.<string, number>} gender - Counts of responses by gender category
+ * @property {Object.<string, number>} position - Counts of responses by academic position
+ * @property {Object.<string, number>} year - Counts of responses by age group
+ */
 type DemographicData = {
   gender: { [key: string]: number };
   position: { [key: string]: number };
   year: { [key: string]: number }; // For age groups
 };
 
+/**
+ * Next.js API route handler for prompt statistics
+ * Analyzes and groups user responses by demographic factors
+ * Only supports GET method
+ * 
+ * @async
+ * @function handler
+ * @param {NextApiRequest} req - The Next.js API request object
+ * @param {NextApiResponse} res - The Next.js API response object
+ * @returns {Promise<void>} Response with status and statistics data
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -41,7 +68,12 @@ export default async function handler(
       });
     }
 
-    // Group responses by the selected answer
+    /**
+     * Group responses by the selected answer
+     * Maps each answer option to an array of user IDs who selected it
+     * 
+     * @type {Object.<string, string[]>}
+     */
     const responsesByAnswer: { [answer: string]: string[] } = {};
     
     responses.forEach(response => {
@@ -54,20 +86,27 @@ export default async function handler(
       responsesByAnswer[selectedResponse].push(userId);
     });
 
-    // For each answer, get demographic stats
+    /**
+     * Stores statistics for each answer option
+     * Contains count and demographic breakdown for each response option
+     * 
+     * @type {Object.<string, {count: number, demographics: DemographicData}>}
+     */
     const answerStats: { [answer: string]: { count: number, demographics: DemographicData } } = {};
     
+    // Process each answer option
     for (const [answer, userIds] of Object.entries(responsesByAnswer)) {
       // Get demographic information for all users who selected this answer
       const users = await User.find({ clerkId: { $in: userIds } });
       
-      // Count demographics
+      // Initialize demographic counters
       const demographics: DemographicData = {
         gender: {},
         position: {},
         year: {}
       };
       
+      // Count demographic data from user profiles
       users.forEach(user => {
         // Count gender
         if (user.gender) {

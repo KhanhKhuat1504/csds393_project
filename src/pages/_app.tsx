@@ -1,9 +1,21 @@
+/**
+ * Custom App component for Next.js
+ * Wraps all pages with Clerk authentication provider
+ * Applies global styles and scripts
+ * 
+ * @module pages/_app
+ */
+
 import "@/styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Metadata } from "next";
 import { AppProps } from "next/app";
 import Script from "next/script";
 
+/**
+ * Metadata for the application
+ * Defines title, description, and OpenGraph image
+ */
 export const metadata: Metadata = {
   title: "Next.js Clerk Template",
   description:
@@ -11,6 +23,15 @@ export const metadata: Metadata = {
   openGraph: { images: ["/og.png"] },
 };
 
+/**
+ * MyApp component
+ * Custom Next.js App component that wraps all pages
+ * Provides Clerk authentication context and styling
+ * Loads PrismJS for code syntax highlighting
+ * 
+ * @param {AppProps} props - Next.js app props including Component and pageProps
+ * @returns {JSX.Element} The app with authentication provider and scripts
+ */
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>

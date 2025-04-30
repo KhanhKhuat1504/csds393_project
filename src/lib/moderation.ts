@@ -1,5 +1,22 @@
+/**
+ * Content moderation utilities using Google Cloud Platform's moderation API
+ * Provides text analysis to detect inappropriate content
+ * 
+ * @module moderation
+ */
+
 import { GoogleAuth } from 'google-auth-library';
 
+/**
+ * Checks if text content is potentially inappropriate using GCP's text moderation service
+ * Analyzes text for harmful categories such as adult content, hate speech, harassment, etc.
+ * 
+ * @async
+ * @function isInappropriate
+ * @param {string} text - The text content to be evaluated for inappropriate content
+ * @returns {Promise<boolean>} Promise resolving to true if content is flagged as inappropriate, false otherwise
+ * @throws Will return true if the API call fails to ensure safe handling of potential moderation errors
+ */
 export const isInappropriate = async (text: string): Promise<boolean> => {
   console.log(`[GCP] Moderation check started for text: "${text}"`);
   const THRESHOLD = 0.7;

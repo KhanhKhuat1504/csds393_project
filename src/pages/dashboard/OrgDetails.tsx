@@ -1,3 +1,10 @@
+/**
+ * OrgDetails component
+ * Displays organization information from Clerk authentication
+ * 
+ * @module dashboard/OrgDetails
+ */
+
 import { useOrganization } from "@clerk/nextjs";
 import { useState } from "react";
 import Toggle from "../components/Toggle";
@@ -5,12 +12,24 @@ import JSONOutput from "../components/JSONOutput";
 import CopyButton from "../components/CopyButton";
 import Image from "next/image";
 
+/**
+ * Global declaration for Prism.js library used for syntax highlighting
+ * Used by the JSONOutput component when displaying organization data in JSON format
+ */
 declare global {
   interface Window {
     Prism: any;
   }
 }
 
+/**
+ * OrgDetails component
+ * Displays organization information including ID, name, member count, and logo
+ * Supports toggle between formatted view and raw JSON data view
+ * Shows fallback message when user is not part of an organization
+ * 
+ * @returns {JSX.Element} Card component displaying organization information
+ */
 export default function OrgDetails() {
   const { isLoaded, organization } = useOrganization();
   const [jsonOutput, setJsonOutput] = useState(false);

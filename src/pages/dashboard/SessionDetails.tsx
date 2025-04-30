@@ -1,3 +1,10 @@
+/**
+ * SessionDetails component
+ * Displays current authentication session information from Clerk
+ * 
+ * @module dashboard/SessionDetails
+ */
+
 import { Dot } from "@/icons";
 import CopyButton from "../components/CopyButton";
 import JSONOutput from "../components/JSONOutput";
@@ -5,12 +12,23 @@ import Toggle from "../components/Toggle";
 import { useSession } from "@clerk/nextjs";
 import { useState } from "react";
 
+/**
+ * Global declaration for Prism.js library used for syntax highlighting
+ * Used by the JSONOutput component when displaying session data in JSON format
+ */
 declare global {
   interface Window {
     Prism: any;
   }
 }
 
+/**
+ * SessionDetails component
+ * Displays authentication session information including ID, status, and expiration
+ * Supports toggle between formatted view and raw JSON data view
+ * 
+ * @returns {JSX.Element} Card component displaying session information
+ */
 export default function SessionDetails() {
   const { isLoaded, session } = useSession();
   const [jsonOutput, setJsonOutput] = useState(false);

@@ -1,15 +1,33 @@
+/**
+ * UserDetails component
+ * Displays user profile information from Clerk authentication
+ * 
+ * @module dashboard/UserDetails
+ */
+
 import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import Toggle from "../components/Toggle";
 import JSONOutput from "../components/JSONOutput";
 import CopyButton from "../components/CopyButton";
 
+/**
+ * Global declaration for Prism.js library used for syntax highlighting
+ * Used by the JSONOutput component when displaying user data in JSON format
+ */
 declare global {
   interface Window {
     Prism: any;
   }
 }
 
+/**
+ * UserDetails component
+ * Displays user information including ID, name, email addresses and profile image
+ * Supports toggle between formatted view and raw JSON data view
+ * 
+ * @returns {JSX.Element} Card component displaying user profile information
+ */
 export default function UserDetails() {
   const { isLoaded, user } = useUser();
   const [jsonOutput, setJsonOutput] = useState(false);

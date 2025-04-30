@@ -1,12 +1,30 @@
+/**
+ * MongoDB database connection utilities
+ * Implements connection pooling pattern for Next.js serverless environment
+ * 
+ * @module dbConnect
+ */
+
 import mongoose, { Mongoose, ConnectOptions } from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
+/**
+ * Interface for mongoose connection cache
+ * 
+ * @interface MongooseCache
+ * @property {Mongoose | null} conn - The cached Mongoose connection instance
+ * @property {Promise<Mongoose> | null} promise - Promise for pending connection
+ */
 interface MongooseCache {
   conn: Mongoose | null;
   promise: Promise<Mongoose> | null;
 }
 
+/**
+ * Global type declaration to extend the global namespace
+ * Allows for persistent connection across serverless function invocations
+ */
 declare global {
   var mongoose: MongooseCache;
 }
@@ -16,9 +34,18 @@ let cached: MongooseCache = global.mongoose || { conn: null, promise: null };
 
 /**
  * Connects to the MongoDB database using Mongoose.
- * Caches the connection to reuse in subsequent calls.
- *
- * @returns {Promise<Mongoose>} The Mongoose instance.
+ * Implements connection pooling to prevent multiple connections in serverless environments.
+ * Caches the connection to reuse in subsequent calls, improving performance.
+ * 
+ * @async
+ * @function dbConnect
+ * @returns {Promise<Mongoose>} The Mongoose instance with an active connection
+ * @throws Will throw an error if the MongoDB connection fails
+ * @example
+ * // Connect to the database
+ * const mongoose = await dbConnect();
+ * // Use the connection to perform database operations
+ * const User = mongoose.model('User', userSchema);
  */
 async function dbConnect(): Promise<Mongoose> {
   if (cached.conn) {

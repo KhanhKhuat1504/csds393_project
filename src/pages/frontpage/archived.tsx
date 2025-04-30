@@ -1,8 +1,29 @@
+/**
+ * Archived component
+ * Displays archived prompts and allows moderators to unarchive them
+ * Shows demographic statistics for responses when a user has answered
+ * 
+ * @module pages/frontpage/archived
+ */
+
 import { SignedIn, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import PromptResponseStats from "../../components/PromptResponseStats";
 
+/**
+ * Represents a prompt/question with multiple response options
+ * 
+ * @interface Prompt
+ * @property {string} _id - Unique identifier for the prompt
+ * @property {string} promptQuestion - The main question text
+ * @property {string} resp1 - First response option
+ * @property {string} resp2 - Second response option
+ * @property {string} resp3 - Third response option
+ * @property {string} resp4 - Fourth response option
+ * @property {boolean} [isArchived] - Whether the prompt is archived
+ * @property {boolean} [isReported] - Whether the prompt has been reported
+ */
 interface Prompt {
   _id: string;
   promptQuestion: string;
@@ -14,6 +35,16 @@ interface Prompt {
   isReported?: boolean;
 }
 
+/**
+ * Represents a user's response to a prompt
+ * 
+ * @interface UserResponseData
+ * @property {string} _id - Unique identifier for the response
+ * @property {string} userId - ID of the user who responded
+ * @property {string} promptId - ID of the prompt being responded to
+ * @property {string} selectedResponse - The selected response option text
+ * @property {Date} responseDate - When the response was submitted
+ */
 interface UserResponseData {
   _id: string;
   userId: string;
@@ -22,6 +53,13 @@ interface UserResponseData {
   responseDate: Date;
 }
 
+/**
+ * Archived component
+ * Displays archived prompts and allows moderators to unarchive them
+ * Shows demographic statistics for responses to archived prompts
+ * 
+ * @returns {JSX.Element} The archived prompts page
+ */
 export default function Archived() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,14 +1,36 @@
+/**
+ * API endpoint for managing user responses to prompts
+ * Handles saving and retrieving which options users selected for specific prompts
+ * 
+ * @module api/user-responses
+ */
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '../../lib/dbConnect';
 import UserResponse from '../../models/UserResponse';
 
+/**
+ * Next.js API route handler for user response operations
+ * Supports:
+ * - GET: Fetch responses by user ID and optionally prompt ID
+ * - POST: Save a new user response with duplicate detection
+ * 
+ * @async
+ * @function handler
+ * @param {NextApiRequest} req - The Next.js API request object
+ * @param {NextApiResponse} res - The Next.js API response object
+ * @returns {Promise<void>} Response with status and JSON data
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   await dbConnect();
 
-  // GET - Fetch user responses (either all for a user or for a specific prompt)
+  /**
+   * GET handler - Fetch user responses
+   * Retrieves responses filtered by userId and optionally promptId
+   */
   if (req.method === 'GET') {
     try {
       const { userId, promptId } = req.query;
@@ -31,7 +53,11 @@ export default async function handler(
     }
   }
 
-  // POST - Save a new user response
+  /**
+   * POST handler - Save a new user response
+   * Records which option a user selected for a prompt
+   * Prevents duplicate responses from the same user for the same prompt
+   */
   else if (req.method === 'POST') {
     try {
       const { userId, promptId, selectedResponse } = req.body;

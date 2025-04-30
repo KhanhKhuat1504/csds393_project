@@ -1,3 +1,14 @@
+/**
+ * Icon components library for the application
+ * This file exports SVG icons as React components
+ */
+
+/**
+ * RightArrow icon component
+ * Displays a right-pointing arrow inside an SVG container
+ * 
+ * @returns {JSX.Element} SVG right arrow icon
+ */
 export function RightArrow() {
   return (
     <svg
@@ -18,6 +29,12 @@ export function RightArrow() {
   );
 }
 
+/**
+ * DownArrow icon component
+ * Displays a downward-pointing arrow inside a circular SVG container
+ * 
+ * @returns {JSX.Element} SVG down arrow icon
+ */
 export function DownArrow() {
   return (
     <svg
@@ -38,6 +55,13 @@ export function DownArrow() {
   );
 }
 
+/**
+ * CopyIcon component
+ * Displays a copy/duplicate document icon
+ * Used for copy-to-clipboard functionality
+ * 
+ * @returns {JSX.Element} SVG copy icon
+ */
 export function CopyIcon() {
   return (
     <svg
@@ -58,6 +82,13 @@ export function CopyIcon() {
   );
 }
 
+/**
+ * Times icon component
+ * Displays an X symbol (close/cancel)
+ * Typically used for close buttons or indicating deletion
+ * 
+ * @returns {JSX.Element} SVG X/times icon
+ */
 export function Times() {
   return (
     <svg
@@ -78,6 +109,13 @@ export function Times() {
   );
 }
 
+/**
+ * Dot icon component
+ * Displays a small green circle
+ * Typically used as a status indicator or bullet point
+ * 
+ * @returns {JSX.Element} SVG dot/circle icon
+ */
 export function Dot() {
   return (
     <svg
@@ -92,6 +130,13 @@ export function Dot() {
   );
 }
 
+/**
+ * Docs icon component
+ * Displays a document/documentation icon
+ * Used for links to documentation or text files
+ * 
+ * @returns {JSX.Element} SVG documentation icon
+ */
 export function Docs() {
   return (
     <svg
@@ -112,6 +157,13 @@ export function Docs() {
   );
 }
 
+/**
+ * Github icon component
+ * Displays the GitHub logo
+ * Used for links to GitHub repositories or profiles
+ * 
+ * @returns {JSX.Element} SVG GitHub logo
+ */
 export function Github() {
   return (
     <svg
@@ -129,6 +181,13 @@ export function Github() {
   );
 }
 
+/**
+ * Twitter icon component
+ * Displays the Twitter/X logo
+ * Used for links to Twitter/X profiles or sharing
+ * 
+ * @returns {JSX.Element} SVG Twitter logo
+ */
 export function Twitter() {
   return (
     <svg
@@ -146,6 +205,13 @@ export function Twitter() {
   );
 }
 
+/**
+ * Discord icon component
+ * Displays the Discord logo
+ * Used for links to Discord servers or communities
+ * 
+ * @returns {JSX.Element} SVG Discord logo
+ */
 export function Discord() {
   return (
     <svg

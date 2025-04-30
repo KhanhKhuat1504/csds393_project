@@ -1,3 +1,11 @@
+/**
+ * Main homepage component for the CaseAsk application
+ * Handles routing between landing page, account creation, and frontpage
+ * Includes user authentication state management
+ * 
+ * @module pages/index
+ */
+
 import { Inter } from "next/font/google";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -10,6 +18,16 @@ import { useRouter } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
+/**
+ * Home component - Main landing page with conditional rendering
+ * Displays different content based on authentication and account status:
+ * - Loading state while checking auth
+ * - Landing page for unauthenticated users
+ * - Account creation for authenticated users without a profile
+ * - Redirects to frontpage for users with completed profiles
+ * 
+ * @returns {JSX.Element} The appropriate page content based on auth status
+ */
 export default function Home() {
   const { isSignedIn, user, isLoaded } = useUser();
   const [isAccountCreated, setIsAccountCreated] = useState(false);
@@ -18,6 +36,10 @@ export default function Home() {
 
   // Check if the user has completed their profile
   useEffect(() => {
+    /**
+     * Fetches user account status from the API
+     * Updates state based on whether profile is complete
+     */
     const checkAccountStatus = async () => {
       if (isLoaded && isSignedIn && user) {
         try {
