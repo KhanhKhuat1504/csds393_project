@@ -2,29 +2,15 @@
 
 CaseAsk is a campus-wide, AI-moderated Q&A web application designed to help students ask and answer questions in a respectful, inclusive, and efficient learning environment. It features automatic content moderation using sentiment and language analysis, real-time updates, and user authentication. 
 
----
-
 ## Live Demo
 
 [https://caseask.vercel.app](https://caseask.vercel.app)
-
----
 
 ## Architecture Overview
 
 ### System Architecture Diagram
 
 ![Architecture Diagram](./public/architecture.png)
-
-**Main Components:**
-- **Frontend:** Next.js with TypeScript
-- **Backend:** Node.js API Routes (serverless)
-- **Database:** MongoDB Atlas
-- **Authentication:** Clerk
-- **Moderation:** Google Cloud Natural Language API
-- **Deployment:** Vercel
-
----
 
 ## Getting Started / Installation
 
@@ -52,18 +38,13 @@ CaseAsk is a campus-wide, AI-moderated Q&A web application designed to help stud
 ```
 3. Set up environment variables:
 
-Create a .env.local file and populate it with:
+Please refer to the provided `.env` file for all required environment variables to run the project:
 
-```bash
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
-CLERK_SECRET_KEY=your_clerk_secret
-SIGNING_SECRET=your_webhook_secret
-MONGODB_URI=your_mongodb_uri
-GOOGLE_API_KEY=your_google_api_key
-GCP_KEY_B64=your_google_api_key_in_base64
-```
+[Download .env file](https://drive.google.com/file/d/110-YRQGPXGBryazU8DdsZ-TFbH6TltrO/view?usp=sharing)
 
-4. Run the development server:
+Make sure to place the downloaded `.env` file in the root of the project directory.
+
+1. Run the development server:
 
 ```bash
 npm run dev
@@ -73,21 +54,24 @@ The application will be running at http://localhost:3000
 
 ## Usage / Examples
 
-Visit the site and sign up with CWRU email login.
+- Visit the site and sign up with CWRU email login.
 
-Use the prompt to submit a post.
+- Use the prompt to submit a post.
 
-The system will auto-moderate using sentiment analysis.
+- The system will auto-moderate using sentiment analysis.
 
-Posts are displayed to the public feed if safe, or flagged otherwise.
+- Posts are displayed to the public feed if safe, or flagged otherwise.
 
-Users can answer, or report questions.
+- Users can answer, or report questions.
+
+- Moderators can remove or unremove prompts.
 
 ## Folder Structure
 
 ```
 CSDS393_PROJECT/
 ├── .next/                   # Next.js build output (auto-generated)
+├── docs/                    # Documentation
 ├── node_modules/            # Installed dependencies
 ├── public/                  # Static assets (e.g., images, icons)
 ├── src/                     # Source code
@@ -108,78 +92,131 @@ CSDS393_PROJECT/
 
 
 ## Tech Stack / Dependencies  
-Frontend: Next.js, React, TypeScript  
+- **Frontend:** Next.js, React, TypeScript  
 
-Backend: Node.js, REST API (via Next.js API Routes) 
+- **Backend:** Node.js, REST API (via Next.js API Routes)  
 
-Database: MongoDB Atlas 
+- **Database:** MongoDB Atlas  
 
-Authentication: Clerk   
+- **Authentication:** Clerk  
 
-Moderation: Google Cloud Natural Language API 
+- **Moderation:** Google Cloud Natural Language API  
 
-Testing: Jest, React Testing Library  
+- **Testing:** Jest, React Testing Library  
 
-Deployment: Vercel  
+- **Deployment:** Vercel  
 
-Other Tools: ESLint, Prettier, GitHub Actions (CI), JSDoc 
+- **Documentation:** Typedoc
+
+- **Other Tools:** ESLint, Prettier
+ 
 
 ## Contribution
 
-Khanh: Clerk Auth, Backend, AI feature and Deployment   
-Evan: Clerk Auth, Frontend, Style, and Moderation   
-Ricky: Frontend and debug the frontend and Backend API     
-Tahir: Backend, and Database management   
+- Khanh: Clerk Auth, Backend, AI feature and Deployment   
+- Evan: Clerk Auth, Frontend, Style, and Moderation   
+- Ricky: Frontend and debug the frontend and Backend API     
+- Tahir: Backend, Database management, and Documentation   
 
 ## Development Retrospective
-What Could Be Improved
+
+- **Test Coverage for Edge Cases:**  
+  While major user flows were thoroughly tested, additional test cases could be added for edge conditions (e.g., network failures, unexpected API responses, or rare user behaviors).
+
+- **Error Handling Consistency:**  
+  Error handling in some API routes could be standardized to ensure consistent status codes and error messages across the application.
+
+- **Frontend Validation:**  
+  Client-side validation could be enhanced to prevent unnecessary API calls and provide faster feedback to users.
+
+- **Moderation Threshold Tuning:**  
+  The confidence threshold for content moderation was statically set. Future iterations could explore dynamic thresholds or user-specific moderation sensitivity.
+
+- **Documentation Depth:**  
+  While TypeDoc covers code structure well, additional context on high-level design decisions, data flow, and user interaction logic could make onboarding easier for new contributors.
+
+- **Automated Deployment:**  
+  Deployment to Vercel was manual. Setting up GitHub Actions or similar CI/CD tools to automate documentation updates and deployments would improve developer workflow.
 
 ## Testing
 This project uses Jest and React Testing Library for unit testing frontend components and backend API routes.
 
-Run tests:
+Tests can be run using the following command:
 
 ```bash
-npm run test
+npm test
 ```
 
-## testing.md Summary
-Unit tests are located in the /tests directory.
+To run a specific test file:
 
-Components tested:
+```bash
+npm test -- src/tests/api.test.ts
+```
 
-User Authentication
+Code coverage reports can be generated with:
 
-Question Submission
+```bash
+npm run test:coverage
+```
 
-Answer Submission
+## Testing Summary
 
-AI Moderation logic
+The unit tests are located in the `src/tests` directory and cover critical user flows and backend logic.
 
-Flagging/Inappropriate Post handling
+### Components Covered
 
-Test Coverage
-We cover ~85% of major flows: posting, answering, flagging, and moderation.
+- **User Authentication**  
+  Simulated using mocked Clerk responses for login, session, and role-based logic.
 
-Auth-related flows are tested using Clerk’s mocked responses.
+- **Question Submission**  
+  Tests ensure correct prompt creation, validation, and flagging behavior.
+
+- **Answer Submission**  
+  Verifies user response handling, storage, and retrieval for analytics.
+
+- **AI Moderation Logic**  
+  Covers content checks using GCP’s moderation API, including edge cases and confidence threshold filtering.
+
+- **Flagging & Inappropriate Post Handling**  
+  Tests report workflows and archiving behavior for reported content.
+
+### Test Coverage
+
+The current test suite covers approximately **100% of all major application flows**, including:
+
+- Prompt creation and submission  
+- Response handling  
+- Moderation service interaction  
+- API data validation and response structure
+
+Authentication-related logic is thoroughly tested using **mocked Clerk APIs** to simulate various user roles and session states.
 
 ## Source Code Documentation
-All classes, functions, and modules include Google-style docstrings.
 
-Documentation generated using JSDoc.
+All classes, functions, interfaces, and modules are documented using TypeScript-style doc comments.
 
-Generate docs:
+Documentation is generated using **TypeDoc**.
+
+### Generate Documentation
+
 ```bash
-npx jsdoc -c jsdoc.config.json
+npm run docs
+```
+The generated documentation is available at:
+
+```bash
+/docs/index.html
 ```
 
-Generated HTML docs are located in:
-
-/docs/html/index.html
-
-
 ## License
-This project is open-source and licensed under the MIT License.
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
 
 ## Contact
 
+For questions, feedback, or collaboration inquiries, feel free to reach out:
+
+Name: Khanh Khuat
+
+Email: ltk30@case.edu
+
+GitHub: github.com/KhanhKhuat1504

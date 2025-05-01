@@ -2,6 +2,7 @@
   "name": "clerk-next-app-pages",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,6 +10,7 @@
     "lint": "next lint",
     "test": "jest",
     "test:db": "jest src/tests/db.test.ts src/tests/api.test.ts",
+    "test:coverage": "jest --coverage",
     "docs": "typedoc"
   },
   "dependencies": {
