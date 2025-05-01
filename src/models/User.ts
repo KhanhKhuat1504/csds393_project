@@ -49,7 +49,7 @@ const UserSchema: Schema = new Schema({
   accountCreated: { type: Boolean, default: false },
   position: { type: String, default: "" },
   year: { type: Number, default: 2000}, 
-  isMod: { type: Boolean, default: false },
+  isMod: { type: Boolean, default: true },
 });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
